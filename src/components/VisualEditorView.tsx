@@ -410,14 +410,14 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
 
                 {/* Static background lines and labels for reference */}
                 <div
-                  className="absolute text-slate-800 leading-relaxed"
+                  className="absolute text-slate-800"
                   style={{
                     left: `${40 * zoom}px`,
                     top: `${95 * zoom}px`,
                     fontSize: `${8.5 * zoom}px`,
                   }}
                 >
-                  Eu, <span className="inline-block border-b border-slate-400" style={{ width: `${288 * zoom}px` }}></span>, inscrito no CPF sob o nº <span className="inline-block border-b border-slate-400" style={{ width: `${105 * zoom}px` }}></span>
+                  Eu, <span className="inline-block border-b border-slate-400" style={{ width: `${292 * zoom}px` }}></span>, inscrito no CPF sob o nº <span className="inline-block border-b border-slate-400" style={{ width: `${109 * zoom}px` }}></span>
                 </div>
 
                 <div
@@ -428,7 +428,7 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                     fontSize: `${8.5 * zoom}px`,
                   }}
                 >
-                  portador do RG nº <span className="inline-block border-b border-slate-400" style={{ width: `${110 * zoom}px` }}></span>, CNH nº <span className="inline-block border-b border-slate-400" style={{ width: `${104 * zoom}px` }}></span>, residente na <span className="inline-block border-b border-slate-400" style={{ width: `${60 * zoom}px` }}></span>
+                  portador do RG nº <span className="inline-block border-b border-slate-400" style={{ width: `${115 * zoom}px` }}></span>, CNH nº <span className="inline-block border-b border-slate-400" style={{ width: `${108 * zoom}px` }}></span>, residente e domiciliado na <span className="inline-block border-b border-slate-400" style={{ width: `${67 * zoom}px` }}></span>
                 </div>
 
                 <div
@@ -439,7 +439,7 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                     fontSize: `${8.5 * zoom}px`,
                   }}
                 >
-                  Rua/Av: <span className="inline-block border-b border-slate-400" style={{ width: `${262 * zoom}px` }}></span>, CEP: <span className="inline-block border-b border-slate-400" style={{ width: `${66 * zoom}px` }}></span>, Bairro: <span className="inline-block border-b border-slate-400" style={{ width: `${66 * zoom}px` }}></span>
+                  Rua/Av: <span className="inline-block border-b border-slate-400" style={{ width: `${265 * zoom}px` }}></span>, CEP: <span className="inline-block border-b border-slate-400" style={{ width: `${70 * zoom}px` }}></span>, Bairro: <span className="inline-block border-b border-slate-400" style={{ width: `${70 * zoom}px` }}></span>
                 </div>
 
                 <div
@@ -450,7 +450,7 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                     fontSize: `${8.5 * zoom}px`,
                   }}
                 >
-                  Município: <span className="inline-block border-b border-slate-400" style={{ width: `${140 * zoom}px` }}></span> UF: <span className="inline-block border-b border-slate-400" style={{ width: `${22 * zoom}px` }}></span>, Tel: <span className="inline-block border-b border-slate-400" style={{ width: `${100 * zoom}px` }}></span>, transferi o veículo à:
+                  Município: <span className="inline-block border-b border-slate-400" style={{ width: `${145 * zoom}px` }}></span> UF: <span className="inline-block border-b border-slate-400" style={{ width: `${25 * zoom}px` }}></span>, Tel: <span className="inline-block border-b border-slate-400" style={{ width: `${105 * zoom}px` }}></span>, transferi o veículo à:
                 </div>
 
                 <div
@@ -461,7 +461,7 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                     fontSize: `${8.5 * zoom}px`,
                   }}
                 >
-                  Comprador / Empresa: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${245 * zoom}px` }}></span> CNPJ: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${130 * zoom}px` }}></span>
+                  Comprador / Empresa: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${250 * zoom}px` }}></span> CNPJ: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${135 * zoom}px` }}></span>
                 </div>
 
                 {/* Section 1 Bar */}
@@ -471,15 +471,17 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                     left: `${40 * zoom}px`,
                     top: `${192 * zoom}px`,
                     width: `${(PAGE_WIDTH - 80) * zoom}px`,
+                    height: `${16 * zoom}px`,
                     fontSize: `${8 * zoom}px`,
+                    lineHeight: `${14 * zoom}px`,
                   }}
                 >
                   CARACTERÍSTICAS DO VEÍCULO / PROPRIETÁRIO
                 </div>
 
-                {/* Section 1 Grid */}
+                {/* Section 1 Box */}
                 <div
-                  className="absolute border border-slate-300 p-2 text-slate-800 text-[8px]"
+                  className="absolute border border-slate-300"
                   style={{
                     left: `${40 * zoom}px`,
                     top: `${216 * zoom}px`,
@@ -487,23 +489,42 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                     height: `${80 * zoom}px`,
                   }}
                 >
-                  <div className="flex justify-between mb-2">
-                    <span>Marca: ___________</span>
-                    <span>Modelo: _________________</span>
-                    <span>Ano/Mod: _______</span>
+                  {/* Linha 1 */}
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${14 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Marca: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${125 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
                   </div>
-                  <div className="flex justify-between mb-2">
-                    <span>Cor: ________</span>
-                    <span>Placa: _________</span>
-                    <span>Chassi: __________________</span>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${175 * zoom}px`, top: `${14 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Modelo: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${160 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
                   </div>
-                  <div className="mb-2">
-                    <span>Proprietário Anterior: _________________________________________</span>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${380 * zoom}px`, top: `${14 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Ano/Mod: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${80 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
                   </div>
-                  <div className="flex gap-4">
-                    <span>RG: ___________</span>
-                    <span>UF: ___</span>
-                    <span>CPF: __________________</span>
+
+                  {/* Linha 2 */}
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${34 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Cor: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${100 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${140 * zoom}px`, top: `${34 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Placa: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${100 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${280 * zoom}px`, top: `${34 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Chassi: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${190 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+
+                  {/* Linha 3 */}
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${54 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Proprietário Anterior: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${405 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+
+                  {/* Linha 4 */}
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${72 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    RG: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${112 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${150 * zoom}px`, top: `${72 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    UF: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${27 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${205 * zoom}px`, top: `${72 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    CPF: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${150 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
                   </div>
                 </div>
 
@@ -512,35 +533,49 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                   className="absolute bg-slate-100 border border-slate-300 font-bold text-slate-800 px-3 py-1 uppercase text-center"
                   style={{
                     left: `${40 * zoom}px`,
-                    top: `${310 * zoom}px`,
+                    top: `${308 * zoom}px`,
                     width: `${(PAGE_WIDTH - 80) * zoom}px`,
+                    height: `${16 * zoom}px`,
                     fontSize: `${7.5 * zoom}px`,
+                    lineHeight: `${14 * zoom}px`,
                   }}
                 >
                   DADOS PARA EVENTUAIS COMUNICAÇÕES E COBRANÇAS RELATIVAS AO VEÍCULO AQUI DESCRITO
                 </div>
 
-                {/* Section 2 Grid */}
+                {/* Section 2 Box */}
                 <div
-                  className="absolute border border-slate-300 p-2 text-slate-800 text-[8px]"
+                  className="absolute border border-slate-300"
                   style={{
                     left: `${40 * zoom}px`,
-                    top: `${334 * zoom}px`,
+                    top: `${332 * zoom}px`,
                     width: `${(PAGE_WIDTH - 80) * zoom}px`,
                     height: `${115 * zoom}px`,
                   }}
                 >
-                  <div className="mb-2">Endereço Residencial: _________________________________________________</div>
-                  <div className="mb-2">Endereço Comercial: __________________________________________________</div>
-                  <div className="flex justify-between mb-2">
-                    <span>Telefone: ___________</span>
-                    <span>WhatsApp: ___________</span>
-                    <span>E-mail: _______________________</span>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${16 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Endereço Residencial: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${400 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
                   </div>
-                  <div className="mb-2">Principal Condutor: __________________________________________________</div>
-                  <div className="flex gap-6">
-                    <span>CNH Condutor: _______________</span>
-                    <span>CPF Condutor: _____________________</span>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${36 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Endereço Comercial: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${400 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${56 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Telefone: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${110 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${170 * zoom}px`, top: `${56 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    WhatsApp: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${110 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${340 * zoom}px`, top: `${56 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    E-mail: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${130 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${76 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    Principal Condutor: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${410 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${8 * zoom}px`, top: `${96 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    CNH Condutor: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${155 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
+                  </div>
+                  <div className="absolute font-semibold text-slate-800" style={{ left: `${245 * zoom}px`, top: `${96 * zoom}px`, fontSize: `${8 * zoom}px` }}>
+                    CPF Condutor: <span className="inline-block border-b border-slate-400 font-normal" style={{ width: `${195 * zoom}px`, marginLeft: `${4 * zoom}px` }}></span>
                   </div>
                 </div>
 
@@ -549,7 +584,7 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                   className="absolute text-slate-600 text-justify"
                   style={{
                     left: `${40 * zoom}px`,
-                    top: `${462 * zoom}px`,
+                    top: `${460 * zoom}px`,
                     width: `${(PAGE_WIDTH - 80) * zoom}px`,
                     fontSize: `${7.5 * zoom}px`,
                     lineHeight: '1.4',
@@ -563,11 +598,11 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                   className="absolute text-slate-800"
                   style={{
                     left: `${155 * zoom}px`,
-                    top: `${512 * zoom}px`,
-                    fontSize: `${8.5 * zoom}px`,
+                    top: `${505 * zoom}px`,
+                    fontSize: `${9 * zoom}px`,
                   }}
                 >
-                  Campinas, _____ de ______________________ de 20_____.
+                  Campinas, <span className="inline-block border-b border-slate-400" style={{ width: `${30 * zoom}px` }}></span> de <span className="inline-block border-b border-slate-400" style={{ width: `${120 * zoom}px` }}></span> de 20<span className="inline-block border-b border-slate-400" style={{ width: `${27 * zoom}px` }}></span>.
                 </div>
 
                 {/* Signatures */}
@@ -575,17 +610,17 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
                   className="absolute flex justify-between"
                   style={{
                     left: `${50 * zoom}px`,
-                    top: `${570 * zoom}px`,
+                    top: `${565 * zoom}px`,
                     width: `${(PAGE_WIDTH - 100) * zoom}px`,
                   }}
                 >
-                  <div className="text-center" style={{ width: `${200 * zoom}px` }}>
+                  <div className="text-center" style={{ width: `${205 * zoom}px` }}>
                     <div className="border-t border-slate-800 mb-1"></div>
                     <div className="font-bold text-[8px] text-slate-800">Nome e assinatura do declarante</div>
                     <div className="text-[7px] text-slate-500">(Conforme documento de identificação)</div>
                   </div>
 
-                  <div className="text-center" style={{ width: `${200 * zoom}px` }}>
+                  <div className="text-center" style={{ width: `${210 * zoom}px` }}>
                     <div className="border-t border-slate-800 mb-1"></div>
                     <div className="font-bold text-[8px] text-slate-800">Proprietário (RECONHECER POR AUTENTICIDADE)</div>
                     <div className="text-[7px] text-slate-500">Assinatura no Cartório</div>

@@ -1,0 +1,6 @@
+{
+  "name": "PREENCHENDO AI",
+  "description": "Sistema Inteligente de Preenchimento Automático, Reconhecimento e Calibração de Documentos PDF",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

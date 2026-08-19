@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { DocumentTemplate, GeneratedDocument } from '../types/document';
 import { processUploadedPdf } from '../services/pdfUploadService';
+import { DiagnosticPanel } from './DiagnosticPanel';
 
 interface DashboardViewProps {
   templates: DocumentTemplate[];
@@ -201,6 +202,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Diagnostic & Deployment Status Panel */}
+      <DiagnosticPanel />
 
       {/* Main Content Grid: Templates + Recent Documents */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

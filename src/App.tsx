@@ -44,6 +44,7 @@ export default function App() {
 
   // Initialize form default values on template change
   useEffect(() => {
+    if (!activeTemplate?.fields) return;
     const initial: Record<string, string> = {};
     activeTemplate.fields.forEach((f) => {
       if (f.default_value && !formValues[f.field_key]) {

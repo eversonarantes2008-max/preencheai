@@ -41,10 +41,21 @@ export const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
   const warningFields: { field: TemplateField; value: string; reason: string }[] = [];
   const missingRequiredFields: { field: TemplateField; reason: string }[] = [];
 
-  template.fields.forEach((field) => {
-    const val = (formValues[field.field_key] || '').trim();
+  const safeFormValues = formValues || {};
+  const safeConfidence = confidenceScores || {};
+  const safeFields = template?.fields || [];
+
+  safeFields.forEach((field) => {
+    let val = (safeFormValues[field.field_key] || '').trim();
+    if (!val) {
+      if (field.field_key === 'declarante_nome') {
+        val = (safeFormValues.nome_completo || safeFormValues.nome || '').trim();
+      } else if (field.field_key === 'nome_completo') {
+        val = (safeFormValues.declarante_nome || safeFormValues.nome || '').trim();
+      }
+    }
     const validation = validateField(field.field_type, val, field.required);
-    const confidence = confidenceScores[field.field_key];
+    const confidence = safeConfidence[field.field_key];
 
     if (field.required && !val) {
       missingRequiredFields.push({

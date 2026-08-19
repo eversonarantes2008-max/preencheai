@@ -248,16 +248,30 @@ export async function generateMasterResponsabilidadePdf(): Promise<Uint8Array> {
 export async function renderDocumentPdf(
   masterPdfBytes: Uint8Array,
   template: DocumentTemplate,
-  values: Record<string, string>
+  values?: Record<string, string>
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(masterPdfBytes);
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const pages = pdfDoc.getPages();
+  const safeValues = values || {};
 
-  for (const field of template.fields) {
-    const rawVal = values[field.field_key];
+  for (const field of (template?.fields || [])) {
+    let rawVal = safeValues[field.field_key];
+    // Also check common aliases if exact key is missing
+    if (rawVal === undefined || rawVal === null || rawVal === '') {
+      if (field.field_key === 'declarante_nome') {
+        rawVal = safeValues.nome_completo || safeValues.nome || '';
+      } else if (field.field_key === 'nome_completo') {
+        rawVal = safeValues.declarante_nome || safeValues.nome || '';
+      } else if (field.field_key === 'declarante_cpf') {
+        rawVal = safeValues.cpf || safeValues.cpf_cnpj || '';
+      } else if (field.field_key === 'cpf') {
+        rawVal = safeValues.declarante_cpf || safeValues.cpf_cnpj || '';
+      }
+    }
+
     if (!rawVal && rawVal !== '0') continue;
 
     const pageIndex = Math.max(0, (field.page || 1) - 1);
@@ -284,8 +298,6 @@ export async function renderDocumentPdf(
 
     // Mathematical coordinate translation:
     // Screen top-left (field.x, field.y) -> PDF bottom-left (x, y)
-    // In our coordinate system, field.y is the top edge.
-    // The baseline for Helvetica text is approximately (pageHeight - field.y - fontSize + 1).
     const pdfX = field.x;
     const pdfY = pageHeight - (field.y + field.height) + 2;
 
@@ -314,7 +326,7 @@ export async function renderDocumentPdf(
  * Generate standard clean filename according to requirement:
  * Termo_de_Responsabilidade_NOME_PLACA.pdf
  */
-export function generateFilename(templateName: string, values: Record<string, string>): string {
+export function generateFilename(templateName: string, values?: Record<string, string>): string {
   const sanitize = (s: string) =>
     (s || '')
       .normalize('NFD')
@@ -323,8 +335,15 @@ export function generateFilename(templateName: string, values: Record<string, st
       .replace(/_+/g, '_')
       .replace(/^_|_$/g, '');
 
-  const nome = sanitize(values.declarante_nome || values.nome || 'Documento');
-  const placa = sanitize(values.veiculo_placa || values.placa || 'SemPlaca');
+  const safeVals = values || {};
+  const nome = sanitize(
+    safeVals.declarante_nome ||
+    safeVals.nome_completo ||
+    safeVals.nome ||
+    safeVals.comprador_nome ||
+    'Documento'
+  );
+  const placa = sanitize(safeVals.veiculo_placa || safeVals.placa || 'SemPlaca');
   const templateSlug = sanitize(templateName || 'Termo_de_Responsabilidade');
 
   return `${templateSlug}_${nome}_${placa}.pdf`;

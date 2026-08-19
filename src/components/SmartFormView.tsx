@@ -142,8 +142,16 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
   // Validation map
   const validations = useMemo(() => {
     const results: Record<string, FieldValidationResult> = {};
-    template.fields.forEach((field) => {
-      const val = formValues[field.field_key] || '';
+    const safeFormValues = formValues || {};
+    (template?.fields || []).forEach((field) => {
+      let val = safeFormValues[field.field_key] || '';
+      if (!val) {
+        if (field.field_key === 'declarante_nome') {
+          val = safeFormValues.nome_completo || safeFormValues.nome || '';
+        } else if (field.field_key === 'nome_completo') {
+          val = safeFormValues.declarante_nome || safeFormValues.nome || '';
+        }
+      }
       results[field.field_key] = validateField(field.field_type, val, field.required);
     });
     return results;
@@ -155,9 +163,17 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
     let validRequired = 0;
     let totalFilled = 0;
     let invalidCount = 0;
+    const safeFormValues = formValues || {};
 
-    template.fields.forEach((field) => {
-      const val = (formValues[field.field_key] || '').trim();
+    (template?.fields || []).forEach((field) => {
+      let val = (safeFormValues[field.field_key] || '').trim();
+      if (!val) {
+        if (field.field_key === 'declarante_nome') {
+          val = (safeFormValues.nome_completo || safeFormValues.nome || '').trim();
+        } else if (field.field_key === 'nome_completo') {
+          val = (safeFormValues.declarante_nome || safeFormValues.nome || '').trim();
+        }
+      }
       const res = validations[field.field_key];
 
       if (val) totalFilled++;
@@ -176,10 +192,10 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
       totalRequired,
       validRequired,
       totalFilled,
-      totalFields: template.fields.length,
+      totalFields: (template?.fields || []).length,
       invalidCount,
       isReady,
-      percent: Math.round((totalFilled / Math.max(1, template.fields.length)) * 100),
+      percent: Math.round((totalFilled / Math.max(1, (template?.fields || []).length)) * 100),
     };
   }, [template, formValues, validations]);
 

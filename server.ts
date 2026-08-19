@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
@@ -8,8 +9,56 @@ dotenv.config();
 
 const PORT = 3000;
 
+// Memory log buffer for diagnostics
+interface ServerLogEntry {
+  id: string;
+  timestamp: string;
+  level: "info" | "warn" | "error" | "build";
+  message: string;
+  category: "system" | "api" | "gemini" | "build";
+}
+
+const serverLogs: ServerLogEntry[] = [
+  {
+    id: "init-1",
+    timestamp: new Date().toISOString(),
+    level: "info",
+    category: "system",
+    message: "Servidor Preenchendo AI inicializado na porta 3000.",
+  },
+  {
+    id: "init-2",
+    timestamp: new Date().toISOString(),
+    level: "build",
+    category: "build",
+    message: "Verificação de artefatos estáticos e suporte SSR/API ativo.",
+  }
+];
+
+function logEvent(level: "info" | "warn" | "error" | "build", category: "system" | "api" | "gemini" | "build", message: string) {
+  const entry: ServerLogEntry = {
+    id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    timestamp: new Date().toISOString(),
+    level,
+    category,
+    message,
+  };
+  serverLogs.unshift(entry);
+  if (serverLogs.length > 50) {
+    serverLogs.pop();
+  }
+}
+
 async function startServer() {
   const app = express();
+
+  // Middleware for request logging into diagnostics
+  app.use((req, _res, next) => {
+    if (req.path.startsWith("/api") && req.path !== "/api/diagnostics") {
+      logEvent("info", "api", `Requisição recebida: ${req.method} ${req.path}`);
+    }
+    next();
+  });
 
   // Support JSON and base64 document payloads
   app.use(express.json({ limit: "25mb" }));
@@ -35,6 +84,94 @@ async function startServer() {
       service: "PREENCHENDO AI API",
       timestamp: new Date().toISOString(),
     });
+  });
+
+  // Diagnostic Endpoint for Deployment Status, Logs, and Env Config
+  app.get("/api/diagnostics", (_req, res) => {
+    try {
+      const distDir = path.resolve(process.cwd(), "dist");
+      const distServer = path.resolve(distDir, "server.cjs");
+      const distIndex = path.resolve(distDir, "index.html");
+
+      const hasDist = fs.existsSync(distDir);
+      const hasServerBundle = fs.existsSync(distServer);
+      const hasIndexHtml = fs.existsSync(distIndex);
+
+      let distFilesCount = 0;
+      if (hasDist) {
+        try {
+          distFilesCount = fs.readdirSync(distDir).length;
+        } catch (_) {}
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY || "";
+      const isApiKeyConfigured = Boolean(apiKey && apiKey.trim().length > 5);
+
+      const mem = process.memoryUsage();
+
+      res.json({
+        success: true,
+        deploymentStatus: {
+          appStatus: "ONLINE",
+          ingressPort: PORT,
+          portConfigured: "3000 (Fixo Ingress)",
+          runtimeMode: process.env.NODE_ENV === "production" ? "Produção (Cloud Run/Nginx)" : "Desenvolvimento",
+          uptimeSeconds: Math.floor(process.uptime()),
+          nodeVersion: process.version,
+          platform: process.platform,
+          timestamp: new Date().toISOString(),
+        },
+        environmentConfig: [
+          {
+            key: "PORT",
+            configured: true,
+            currentValue: "3000",
+            status: "OK",
+            description: "Porta padrão de Ingress do Google Cloud Run / Nginx",
+          },
+          {
+            key: "NODE_ENV",
+            configured: true,
+            currentValue: process.env.NODE_ENV || "development",
+            status: "OK",
+            description: "Modo de execução da aplicação",
+          },
+          {
+            key: "GEMINI_API_KEY",
+            configured: isApiKeyConfigured,
+            currentValue: isApiKeyConfigured ? `Configurado (${apiKey.slice(0, 4)}...${apiKey.slice(-4)})` : "Não detectada (utilizando heurística offline inteligente)",
+            status: isApiKeyConfigured ? "OK" : "AVISO",
+            description: "Chave da API do Google Gemini para IA generativa avançada",
+          },
+          {
+            key: "DISABLE_HMR",
+            configured: Boolean(process.env.DISABLE_HMR),
+            currentValue: process.env.DISABLE_HMR || "não definido",
+            status: "OK",
+            description: "Variável do container AI Studio para controle de hot-reload",
+          },
+        ],
+        buildArtifacts: {
+          distFolder: hasDist,
+          serverBundle: hasServerBundle,
+          indexHtml: hasIndexHtml,
+          distFilesCount,
+          buildReady: hasDist && hasIndexHtml,
+          lastBuildCheck: new Date().toISOString(),
+        },
+        serverLogs,
+        systemMetrics: {
+          rssMb: (mem.rss / (1024 * 1024)).toFixed(1),
+          heapUsedMb: (mem.heapUsed / (1024 * 1024)).toFixed(1),
+          heapTotalMb: (mem.heapTotal / (1024 * 1024)).toFixed(1),
+        },
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        error: err?.message || "Erro ao consultar diagnósticos",
+      });
+    }
   });
 
   // Smart Data Extraction via Gemini AI (Document Intelligence)

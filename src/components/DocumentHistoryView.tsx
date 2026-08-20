@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GeneratedDocument } from '../types/document';
+import { GeneratedDocument, DocumentTemplate } from '../types/document';
 import {
   History,
   Search,
@@ -15,17 +15,21 @@ import {
 
 interface DocumentHistoryViewProps {
   documents: GeneratedDocument[];
+  templates: DocumentTemplate[];
   onDownload: (doc: GeneratedDocument) => void;
   onDuplicateToForm: (doc: GeneratedDocument) => void;
   onDelete: (docId: string) => void;
+  onClearAll?: () => void;
   onNavigateToForm: () => void;
 }
 
 export const DocumentHistoryView: React.FC<DocumentHistoryViewProps> = ({
   documents,
+  templates: _templates,
   onDownload,
   onDuplicateToForm,
   onDelete,
+  onClearAll,
   onNavigateToForm,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +42,18 @@ export const DocumentHistoryView: React.FC<DocumentHistoryViewProps> = ({
     const plateMatch = (d.values?.veiculo_placa || '').toLowerCase().includes(term);
     return nameMatch || templateMatch || declMatch || plateMatch;
   });
+
+  const handleDeleteSingle = (doc: GeneratedDocument) => {
+    if (window.confirm(`Deseja realmente excluir o arquivo "${doc.file_name}" do histórico?`)) {
+      onDelete(doc.id);
+    }
+  };
+
+  const handleClearAll = () => {
+    if (window.confirm(`Tem certeza que deseja excluir permanentemente todos os ${documents.length} arquivos do histórico?`)) {
+      if (onClearAll) onClearAll();
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-20">
@@ -52,18 +68,31 @@ export const DocumentHistoryView: React.FC<DocumentHistoryViewProps> = ({
               Histórico de Documentos Gerados
             </h1>
             <p className="text-xs text-slate-500">
-              Registros e downloads de todos os PDFs gerados pelo PREENCHENDO AI
+              Registros e downloads de todos os PDFs gerados pelo PREENCHENDO AI ({documents.length} {documents.length === 1 ? 'arquivo' : 'arquivos'})
             </p>
           </div>
         </div>
 
-        <button
-          onClick={onNavigateToForm}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm shadow-blue-200 transition-all self-start sm:self-auto"
-        >
-          <FileText className="w-4 h-4" />
-          <span>+ Novo Preenchimento</span>
-        </button>
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {documents.length > 0 && onClearAll && (
+            <button
+              onClick={handleClearAll}
+              className="bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 hover:text-rose-700 font-semibold text-xs px-3.5 py-2.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+              title="Excluir todos os arquivos do histórico"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+              <span>Excluir Todos</span>
+            </button>
+          )}
+
+          <button
+            onClick={onNavigateToForm}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm shadow-blue-200 transition-all cursor-pointer"
+          >
+            <FileText className="w-4 h-4" />
+            <span>+ Novo Preenchimento</span>
+          </button>
+        </div>
       </div>
 
       {/* Search Filter Bar */}
@@ -136,9 +165,9 @@ export const DocumentHistoryView: React.FC<DocumentHistoryViewProps> = ({
                     </button>
 
                     <button
-                      onClick={() => onDelete(doc.id)}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
-                      title="Excluir Registro"
+                      onClick={() => handleDeleteSingle(doc)}
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200 cursor-pointer"
+                      title="Excluir este arquivo gerado"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

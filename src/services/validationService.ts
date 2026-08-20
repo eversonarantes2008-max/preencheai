@@ -4,9 +4,17 @@
 
 import { FieldType, FieldValidationResult } from '../types/document';
 
+// --- Helper to check if field is filled with filler dashes or exempted ---
+export function isDashFiller(val: string): boolean {
+  if (!val) return false;
+  const trimmed = val.trim();
+  return /^[-–—_\s/NnAa.EeXx]+$/.test(trimmed) || trimmed.startsWith('-') || /^isento$/i.test(trimmed) || /^sem$/i.test(trimmed);
+}
+
 // --- CPF Checksum Validation (Algorithm Mod 11) ---
 export function validateCPF(cpfRaw: string): boolean {
   if (!cpfRaw) return false;
+  if (isDashFiller(cpfRaw)) return true;
   const cpf = cpfRaw.replace(/\D/g, '');
   if (cpf.length !== 11) return false;
   if (/^(\d)\1{10}$/.test(cpf)) return false; // Reject all identical digits
@@ -35,6 +43,7 @@ export function validateCPF(cpfRaw: string): boolean {
 // --- CNPJ Checksum Validation (Algorithm Mod 11) ---
 export function validateCNPJ(cnpjRaw: string): boolean {
   if (!cnpjRaw) return false;
+  if (isDashFiller(cnpjRaw)) return true;
   const cnpj = cnpjRaw.replace(/\D/g, '');
   if (cnpj.length !== 14) return false;
   if (/^(\d)\1{13}$/.test(cnpj)) return false;
@@ -72,6 +81,7 @@ export function validateCNPJ(cnpjRaw: string): boolean {
 // --- Placa Validation (Mercosul or Traditional) ---
 export function validatePlaca(placaRaw: string): boolean {
   if (!placaRaw) return false;
+  if (isDashFiller(placaRaw)) return true;
   const clean = placaRaw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   if (clean.length !== 7) return false;
   // Traditional: ABC1234
@@ -84,6 +94,7 @@ export function validatePlaca(placaRaw: string): boolean {
 // --- Chassi Validation ---
 export function validateChassi(chassiRaw: string): boolean {
   if (!chassiRaw) return false;
+  if (isDashFiller(chassiRaw)) return true;
   const clean = chassiRaw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   // Standard VIN/Chassi is 17 alphanumeric characters, excluding I, O, Q
   if (clean.length !== 17) return false;
@@ -94,12 +105,14 @@ export function validateChassi(chassiRaw: string): boolean {
 // --- Email Validation ---
 export function validateEmail(email: string): boolean {
   if (!email) return false;
+  if (isDashFiller(email)) return true;
   return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email.trim());
 }
 
 // --- CEP Validation ---
 export function validateCEP(cepRaw: string): boolean {
   if (!cepRaw) return false;
+  if (isDashFiller(cepRaw)) return true;
   const clean = cepRaw.replace(/\D/g, '');
   return clean.length === 8;
 }
@@ -107,6 +120,7 @@ export function validateCEP(cepRaw: string): boolean {
 // --- Phone Validation ---
 export function validatePhone(phoneRaw: string): boolean {
   if (!phoneRaw) return false;
+  if (isDashFiller(phoneRaw)) return true;
   const clean = phoneRaw.replace(/\D/g, '');
   return clean.length === 10 || clean.length === 11;
 }
@@ -120,6 +134,11 @@ export function validateField(type: FieldType, value: string, required: boolean)
   }
 
   if (!trimmed) {
+    return { isValid: true };
+  }
+
+  // Allow dashed fillers (e.g. ----) in any field / lacuna
+  if (isDashFiller(trimmed)) {
     return { isValid: true };
   }
 
@@ -161,6 +180,12 @@ export function validateField(type: FieldType, value: string, required: boolean)
 // --- Input Masking Helpers ---
 export function applyMask(type: FieldType, rawValue: string): string {
   if (!rawValue) return '';
+  
+  // Do not format if the user is inputting dashes/fillers like ---- or -
+  if (isDashFiller(rawValue) || rawValue.includes('-') && rawValue.replace(/\D/g, '').length === 0) {
+    return rawValue;
+  }
+
   const digitsOnly = rawValue.replace(/\D/g, '');
 
   switch (type) {

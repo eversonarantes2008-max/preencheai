@@ -104,6 +104,7 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
   const [aiRawText, setAiRawText] = useState('');
   const [isExtracting, setIsExtracting] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
 
   // Group fields logically
   const groupedFields = useMemo(() => {
@@ -308,11 +309,59 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
             ></div>
           </div>
         </div>
+
+        {/* Group Selector / Navigation Tabs */}
+        <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+          <button
+            onClick={() => setSelectedGroupFilter('all')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              selectedGroupFilter === 'all'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            Todos ({stats.totalFields} campos)
+          </button>
+
+          {groupedFields.map(({ group, meta, fields }) => {
+            const filledInGroup = fields.filter((f) => !!(formValues[f.field_key] || '').trim()).length;
+            const isComplete = filledInGroup === fields.length && fields.length > 0;
+
+            return (
+              <button
+                key={group}
+                onClick={() => setSelectedGroupFilter(group)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  selectedGroupFilter === group
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : isComplete
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <span>{meta.label.split('.')[1]?.trim() || meta.label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                    selectedGroupFilter === group
+                      ? 'bg-white/20 text-white'
+                      : isComplete
+                      ? 'bg-emerald-200/60 text-emerald-800'
+                      : 'bg-slate-200 text-slate-700'
+                  }`}
+                >
+                  {filledInGroup}/{fields.length}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Field Groups Accordions */}
       <div className="space-y-4">
-        {groupedFields.map(({ group, meta, fields }) => (
+        {groupedFields
+          .filter(({ group }) => selectedGroupFilter === 'all' || selectedGroupFilter === group)
+          .map(({ group, meta, fields }) => (
           <div
             key={group}
             className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs transition-all"
@@ -374,30 +423,61 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
                       )}
                     </div>
 
-                    <div className="relative">
-                      <input
-                        type={field.field_type === 'number' ? 'number' : 'text'}
-                        value={value}
-                        maxLength={field.max_length}
-                        onChange={(e) => handleInputChange(field, e.target.value)}
-                        placeholder={field.test_value || field.description || 'Preencher...'}
-                        className={`w-full bg-slate-50/70 border rounded-lg px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-all ${
-                          isInvalid
-                            ? 'border-rose-400 focus:ring-1 focus:ring-rose-500 bg-rose-50/30'
-                            : value && validation.isValid
-                            ? 'border-emerald-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-emerald-50/20'
-                            : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                    {field.field_type === 'checkbox' ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextVal = value ? '' : 'X';
+                          handleInputChange(field, nextVal);
+                        }}
+                        className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                          value
+                            ? 'bg-blue-50 border-blue-400 text-blue-900 shadow-xs'
+                            : 'bg-slate-50/70 border-slate-200 text-slate-600 hover:bg-slate-100'
                         }`}
-                      />
+                      >
+                        <span className="flex items-center gap-2">
+                          <span
+                            className={`w-5 h-5 rounded flex items-center justify-center border font-bold text-xs ${
+                              value
+                                ? 'bg-blue-600 border-blue-600 text-white'
+                                : 'bg-white border-slate-300 text-transparent'
+                            }`}
+                          >
+                            X
+                          </span>
+                          <span>{value ? 'Opção Marcada com [ X ]' : 'Clique para marcar [ X ]'}</span>
+                        </span>
+                        <span className="text-[10px] font-mono font-semibold uppercase text-slate-400">
+                          {value ? 'Ativo' : 'Em branco'}
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type={field.field_type === 'number' ? 'number' : 'text'}
+                          value={value}
+                          maxLength={field.max_length}
+                          onChange={(e) => handleInputChange(field, e.target.value)}
+                          placeholder={field.test_value || field.description || 'Preencher... (ou ----)'}
+                          className={`w-full bg-slate-50/70 border rounded-lg px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-all ${
+                            isInvalid
+                              ? 'border-rose-400 focus:ring-1 focus:ring-rose-500 bg-rose-50/30'
+                              : value && validation.isValid
+                              ? 'border-emerald-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-emerald-50/20'
+                              : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                          }`}
+                        />
 
-                      {value && validation.isValid && (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-3 top-2.5 pointer-events-none" />
-                      )}
+                        {value && validation.isValid && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-3 top-2.5 pointer-events-none" />
+                        )}
 
-                      {isInvalid && (
-                        <AlertCircle className="w-4 h-4 text-rose-500 absolute right-3 top-2.5 pointer-events-none" />
-                      )}
-                    </div>
+                        {isInvalid && (
+                          <AlertCircle className="w-4 h-4 text-rose-500 absolute right-3 top-2.5 pointer-events-none" />
+                        )}
+                      </div>
+                    )}
 
                     {isInvalid && (
                       <p className="text-[10px] text-rose-600 flex items-center gap-1 font-medium">

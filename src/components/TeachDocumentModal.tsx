@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { detectPdfFieldsWithAi } from '../services/aiExtractionService';
 import { PAGE_WIDTH, PAGE_HEIGHT } from '../services/pdfGenerator';
+import { createDefaultFieldsForTemplate } from '../services/templateStore';
 
 interface TeachDocumentModalProps {
   isOpen: boolean;
@@ -99,51 +100,10 @@ export const TeachDocumentModal: React.FC<TeachDocumentModalProps> = ({
             group: f.group || 'outros',
             test_value: 'Dado de Teste',
           }));
-        } else {
-          // Default initial candidate fields
-          fields = [
-            {
-              id: `f_1_${Date.now()}`,
-              template_id: `tpl_${Date.now()}`,
-              field_key: 'nome_completo',
-              label: 'Nome Completo',
-              page: 1,
-              x: 80,
-              y: 120,
-              width: 250,
-              height: 14,
-              font_size: 8.5,
-              font_weight: 'bold',
-              alignment: 'left',
-              field_type: 'text',
-              required: true,
-              auto_resize: true,
-              sort_order: 1,
-              group: 'declarante',
-              test_value: 'João da Silva',
-            },
-            {
-              id: `f_2_${Date.now()}`,
-              template_id: `tpl_${Date.now()}`,
-              field_key: 'cpf',
-              label: 'CPF',
-              page: 1,
-              x: 350,
-              y: 120,
-              width: 120,
-              height: 14,
-              font_size: 8.5,
-              font_weight: 'normal',
-              alignment: 'left',
-              field_type: 'cpf',
-              required: true,
-              mask: '000.000.000-00',
-              auto_resize: true,
-              sort_order: 2,
-              group: 'declarante',
-              test_value: '123.456.789-00',
-            },
-          ];
+        }
+        
+        if (fields.length < 10) {
+          fields = createDefaultFieldsForTemplate(`tpl_${Date.now()}`);
         }
 
         setDetectedFields(fields);

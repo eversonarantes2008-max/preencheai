@@ -32,6 +32,8 @@ interface DashboardViewProps {
   onDownloadHistoryDoc: (doc: GeneratedDocument) => void;
   onPdfUploaded: (template: DocumentTemplate) => void;
   onDeleteTemplate?: (templateId: string) => void;
+  onDeleteHistoryDoc?: (docId: string) => void;
+  onClearAllHistory?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -44,6 +46,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onDownloadHistoryDoc,
   onPdfUploaded,
   onDeleteTemplate,
+  onDeleteHistoryDoc,
+  onClearAllHistory,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -313,7 +317,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Clock className="w-4 h-4 text-blue-600" />
               Documentos Recentes
             </h2>
-            <span className="text-xs text-slate-400 font-medium">{recentDocuments.length} itens</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400 font-medium">{recentDocuments.length} itens</span>
+              {recentDocuments.length > 0 && onClearAllHistory && (
+                <button
+                  onClick={() => {
+                    if (window.confirm('Tem certeza que deseja excluir todos os documentos gerados do histórico?')) {
+                      onClearAllHistory();
+                    }
+                  }}
+                  className="text-[11px] text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-medium px-2 py-0.5 rounded transition-colors cursor-pointer"
+                  title="Limpar todos os arquivos do histórico"
+                >
+                  Limpar tudo
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-xs">
@@ -329,7 +348,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               recentDocuments.slice(0, 5).map((doc) => (
                 <div
                   key={doc.id}
-                  className="bg-slate-50 hover:bg-blue-50/50 border border-slate-200/80 rounded-lg p-3 transition-colors flex items-center justify-between gap-2"
+                  className="bg-slate-50 hover:bg-blue-50/50 border border-slate-200/80 rounded-lg p-3 transition-colors flex items-center justify-between gap-2 group"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-semibold text-slate-800 truncate" title={doc.file_name}>
@@ -346,10 +365,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <button
                       onClick={() => onDownloadHistoryDoc(doc)}
                       title="Baixar PDF"
-                      className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-md transition-colors"
+                      className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-md transition-colors cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
                     </button>
+                    {onDeleteHistoryDoc && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Deseja excluir o arquivo "${doc.file_name}" do histórico?`)) {
+                            onDeleteHistoryDoc(doc.id);
+                          }
+                        }}
+                        title="Excluir este arquivo"
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))

@@ -210,7 +210,7 @@ export const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100">
           <button
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar ao Formulário</span>
@@ -219,16 +219,14 @@ export const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={onConfirmPreview}
-              disabled={!canGenerate}
-              className="flex-1 sm:flex-initial bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-800 border border-slate-200 text-xs font-bold px-4 py-2.5 rounded-lg transition-colors"
+              className="flex-1 sm:flex-initial bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold px-4 py-2.5 rounded-lg transition-colors cursor-pointer"
             >
               Visualizar Prévia
             </button>
 
             <button
               onClick={onDirectGenerate}
-              disabled={!canGenerate}
-              className="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-bold text-xs px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm shadow-blue-200 transition-all transform active:scale-95"
+              className="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm shadow-blue-200 transition-all transform active:scale-95 cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Gerar e Baixar PDF</span>

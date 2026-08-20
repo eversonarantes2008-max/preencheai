@@ -12,7 +12,11 @@ export type FieldType =
   | 'chassis'
   | 'date'
   | 'number'
-  | 'textarea';
+  | 'currency'
+  | 'year'
+  | 'state'
+  | 'textarea'
+  | 'checkbox';
 
 export type TemplateStatus = 'draft' | 'calibrating' | 'active' | 'archived';
 

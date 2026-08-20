@@ -11,7 +11,13 @@ import {
   loadDocumentHistory,
   saveDocumentToHistory,
   deleteDocumentFromHistory,
+  clearAllDocumentHistory,
+  getMasterPdfBytes,
 } from './services/templateStore';
+import {
+  renderDocumentPdf,
+  generateFilename,
+} from './services/pdfGenerator';
 import { Navbar } from './components/Navbar';
 import { DashboardView } from './components/DashboardView';
 import { SmartFormView } from './components/SmartFormView';
@@ -70,54 +76,28 @@ export default function App() {
 
   // Fill with test data
   const handleFillExample = () => {
-    const exampleValues: Record<string, string> = {
-      declarante_nome: 'João da Silva',
-      declarante_cpf: '123.456.789-00',
-      declarante_rg: '12.345.678',
-      declarante_cnh: '123456789',
-      declarante_endereco: 'Rua das Flores, 100',
-      declarante_cep: '13000-000',
-      declarante_bairro: 'Cambuí',
-      declarante_municipio: 'Campinas',
-      declarante_estado: 'SP',
-      declarante_telefone: '(19) 99876-5432',
-
-      comprador_nome: 'Auto Peças & Veículos Campinas Ltda',
-      comprador_cnpj: '12.345.678/0001-90',
-
-      veiculo_marca: 'GWM',
-      veiculo_modelo: 'ORA 5 Skin',
-      veiculo_modelo_ano: '2026/2026',
-      veiculo_cor: 'Branco',
-      veiculo_placa: 'ABC1D23',
-      veiculo_chassi: '9BWTESTE123456789',
-
-      proprietario_nome: 'João da Silva',
-      proprietario_rg: '12.345.678',
-      proprietario_rg_uf: 'SP',
-      proprietario_cpf: '123.456.789-00',
-
-      endereco_residencial: 'Rua das Flores, 100 - Cambuí - Campinas/SP',
-      endereco_comercial: 'Av. Brasil, 500 - Sala 12 - Centro',
-      telefone_comunicacao: '(19) 3234-5678',
-      whatsapp: '(19) 99876-5432',
-      email: 'joao.silva@email.com',
-      principal_condutor: 'João da Silva',
-      cnh_principal_condutor: '123456789',
-      cpf_principal_condutor: '123.456.789-00',
-
-      data_dia: String(new Date().getDate()).padStart(2, '0'),
-      data_mes: [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-      ][new Date().getMonth()],
-      data_ano: String(new Date().getFullYear()).slice(-2),
-    };
-
+    const exampleValues: Record<string, string> = {};
     const exampleConfidences: Record<string, number> = {};
-    Object.keys(exampleValues).forEach((k) => {
-      exampleConfidences[k] = 98;
+
+    // Populate all fields dynamically from active template definitions
+    activeTemplate.fields.forEach((field) => {
+      if (field.test_value !== undefined) {
+        exampleValues[field.field_key] = field.test_value;
+        exampleConfidences[field.field_key] = 99;
+      }
     });
+
+    // Ensure dates are fresh if not already present
+    const now = new Date();
+    const months = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    if (!exampleValues['data_dia']) exampleValues['data_dia'] = String(now.getDate()).padStart(2, '0');
+    if (!exampleValues['data_mes']) exampleValues['data_mes'] = months[now.getMonth()];
+    if (!exampleValues['data_ano']) exampleValues['data_ano'] = String(now.getFullYear()).slice(-2);
+    if (!exampleValues['data_ano_completo']) exampleValues['data_ano_completo'] = String(now.getFullYear());
 
     setFormValues(exampleValues);
     setConfidenceScores(exampleConfidences);
@@ -189,6 +169,11 @@ export default function App() {
     setRecentDocuments(loadDocumentHistory());
   };
 
+  const handleClearAllHistory = () => {
+    clearAllDocumentHistory();
+    setRecentDocuments([]);
+  };
+
   const handleCompleteTeachNewTemplate = (newTemplate: DocumentTemplate) => {
     saveTemplate(newTemplate);
     const updated = loadAllTemplates();
@@ -213,6 +198,52 @@ export default function App() {
     if (activeTemplate.id === templateId) {
       setActiveTemplate(updated[0] || BUILT_IN_TEMPLATE_RESPONSABILIDADE);
     }
+  };
+
+  const handleConfirmPreview = () => {
+    setIsReviewOpen(false);
+    setCurrentView('preview');
+  };
+
+  const handleDirectGenerate = async () => {
+    setIsReviewOpen(false);
+    try {
+      const masterBytes = await getMasterPdfBytes(activeTemplate);
+      const overlaidBytes = await renderDocumentPdf(masterBytes, activeTemplate, formValues);
+      const fileName = generateFilename(activeTemplate.name, formValues);
+      const blob = new Blob([overlaidBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      // Trigger instantaneous browser download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Save to document history
+      handleSaveToHistory(fileName, url, overlaidBytes.byteLength);
+
+      // Switch to preview view for visual confirmation
+      setCurrentView('preview');
+    } catch (err) {
+      console.error('Error generating document:', err);
+      setCurrentView('preview');
+    }
+  };
+
+  const handleJumpToField = (fieldKey: string) => {
+    setIsReviewOpen(false);
+    setCurrentView('form');
+    // Allow React to mount the form view then focus field
+    setTimeout(() => {
+      const el = document.querySelector(`[name="${fieldKey}"]`) as HTMLElement | null;
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+      }
+    }, 100);
   };
 
   return (
@@ -248,6 +279,8 @@ export default function App() {
             onDownloadHistoryDoc={handleDownloadHistoryDoc}
             onPdfUploaded={handlePdfUploaded}
             onDeleteTemplate={handleDeleteTemplate}
+            onDeleteHistoryDoc={handleDeleteHistoryDoc}
+            onClearAllHistory={handleClearAllHistory}
           />
         )}
 
@@ -294,6 +327,7 @@ export default function App() {
             onDownloadDoc={handleDownloadHistoryDoc}
             onDuplicateToForm={handleDuplicateToForm}
             onDeleteDoc={handleDeleteHistoryDoc}
+            onClearAll={handleClearAllHistory}
             onNavigateToForm={() => setCurrentView('form')}
           />
         )}
@@ -305,10 +339,10 @@ export default function App() {
         onClose={() => setIsReviewOpen(false)}
         template={activeTemplate}
         formValues={formValues}
-        onConfirmGenerate={() => {
-          setIsReviewOpen(false);
-          setCurrentView('preview');
-        }}
+        confidenceScores={confidenceScores}
+        onConfirmPreview={handleConfirmPreview}
+        onDirectGenerate={handleDirectGenerate}
+        onJumpToField={handleJumpToField}
       />
 
       {/* Teach & Ingest New PDF Template Modal */}

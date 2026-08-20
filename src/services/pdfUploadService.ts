@@ -1,7 +1,7 @@
 import { DocumentTemplate, TemplateField } from '../types/document';
 import { PAGE_WIDTH, PAGE_HEIGHT } from './pdfGenerator';
 import { detectPdfFieldsWithAi } from './aiExtractionService';
-import { saveTemplate, loadAllTemplates } from './templateStore';
+import { saveTemplate, loadAllTemplates, createDefaultFieldsForTemplate } from './templateStore';
 import { PDFDocument } from 'pdf-lib';
 
 export interface UploadPdfResult {
@@ -109,71 +109,9 @@ export async function processUploadedPdf(file: File): Promise<UploadPdfResult> {
     console.warn('AI field detection fallback:', e);
   }
 
-  // If no fields detected, generate baseline starter fields
-  if (fields.length === 0) {
-    fields = [
-      {
-        id: `f_1_${Date.now()}`,
-        template_id: templateId,
-        field_key: 'nome_completo',
-        label: 'Nome Completo',
-        page: 1,
-        x: 60,
-        y: 90,
-        width: 250,
-        height: 14,
-        font_size: 8.5,
-        font_weight: 'bold',
-        alignment: 'left',
-        field_type: 'text',
-        required: true,
-        auto_resize: true,
-        sort_order: 1,
-        group: 'declarante',
-        test_value: 'Nome do Titular',
-      },
-      {
-        id: `f_2_${Date.now()}`,
-        template_id: templateId,
-        field_key: 'cpf_cnpj',
-        label: 'CPF / CNPJ',
-        page: 1,
-        x: 350,
-        y: 90,
-        width: 140,
-        height: 14,
-        font_size: 8.5,
-        font_weight: 'normal',
-        alignment: 'left',
-        field_type: 'cpf',
-        required: true,
-        mask: '000.000.000-00',
-        auto_resize: true,
-        sort_order: 2,
-        group: 'declarante',
-        test_value: '000.000.000-00',
-      },
-      {
-        id: `f_3_${Date.now()}`,
-        template_id: templateId,
-        field_key: 'data_documento',
-        label: 'Data do Documento',
-        page: 1,
-        x: 60,
-        y: 130,
-        width: 120,
-        height: 14,
-        font_size: 8.5,
-        font_weight: 'normal',
-        alignment: 'left',
-        field_type: 'date',
-        required: false,
-        auto_resize: true,
-        sort_order: 3,
-        group: 'data',
-        test_value: new Date().toLocaleDateString('pt-BR'),
-      },
-    ];
+  // If no fields or incomplete fields detected, populate with the full 33-field standard set
+  if (fields.length < 10) {
+    fields = createDefaultFieldsForTemplate(templateId);
   }
 
   const newTemplate: DocumentTemplate = {

@@ -63,13 +63,25 @@ function runLocalHeuristicExtraction(text: string): DocumentExtractionResult {
   // Extract CPF
   const cpf = clean.match(/\b(\d{3}\.?\d{3}\.?\d{3}-?\d{2})\b/);
   if (cpf) {
-    fields.declarante_cpf = { value: applyMask('cpf', cpf[1]), confidence: 95 };
+    const formattedCpf = applyMask('cpf', cpf[1]);
+    fields.declarante_cpf = { value: formattedCpf, confidence: 95 };
+    fields.vendedor_cpf = { value: formattedCpf, confidence: 95 };
+    fields.cliente_cpf = { value: formattedCpf, confidence: 95 };
+  }
+
+  // Extract RG
+  const rg = clean.match(/RG[:\s.]*([0-9A-Za-z.\-]{7,14})/i);
+  if (rg) {
+    fields.declarante_rg = { value: rg[1].trim(), confidence: 90 };
+    fields.vendedor_rg = { value: rg[1].trim(), confidence: 90 };
   }
 
   // Extract CNPJ
   const cnpj = clean.match(/\b(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})\b/);
   if (cnpj) {
-    fields.comprador_cnpj = { value: applyMask('cnpj', cnpj[1]), confidence: 95 };
+    const formattedCnpj = applyMask('cnpj', cnpj[1]);
+    fields.comprador_cnpj = { value: formattedCnpj, confidence: 95 };
+    fields.empresa_cnpj = { value: formattedCnpj, confidence: 95 };
   }
 
   // Extract Placa
@@ -97,9 +109,12 @@ function runLocalHeuristicExtraction(text: string): DocumentExtractionResult {
   }
 
   // Extract names or simple key-value patterns
-  const nameMatch = clean.match(/nome\s*(?:do\s*declarante)?[:=\-]?\s*([A-Za-zÀ-ÖØ-öø-ÿ\s]{4,35})/i);
+  const nameMatch = clean.match(/nome\s*(?:do\s*declarante|do\s*vendedor|do\s*cliente)?[:=\-]?\s*([A-Za-zÀ-ÖØ-öø-ÿ\s]{4,35})/i);
   if (nameMatch) {
-    fields.declarante_nome = { value: nameMatch[1].trim(), confidence: 88 };
+    const nameVal = nameMatch[1].trim();
+    fields.declarante_nome = { value: nameVal, confidence: 88 };
+    fields.vendedor_nome = { value: nameVal, confidence: 88 };
+    fields.cliente_nome = { value: nameVal, confidence: 88 };
   }
 
   // Chassi

@@ -70,156 +70,186 @@ export async function generateMasterResponsabilidadePdf(): Promise<Uint8Array> {
   drawHLine(215, 121, 380, 0.8);
 
   // --- Declaração Principal ---
-  drawTxt('Eu,', 80, 150, 8);
-  drawHLine(95, 150, 415);
-  drawTxt(', inscrito no CPF sob', 418, 150, 8);
+  // Line 1 (y: 145)
+  drawTxt('Eu,', 80, 145, 8);
+  drawHLine(95, 145, 418);
+  drawTxt(', inscrito no CPF sob', 420, 145, 8);
 
-  drawTxt('o nº', 80, 164.5, 8);
-  drawHLine(97, 164.5, 208);
-  drawTxt(', RG. Nº', 210, 164.5, 8);
-  drawHLine(248, 164.5, 345);
-  drawTxt(', e CNH Nº', 348, 164.5, 8);
-  drawHLine(402, 164.5, 475);
-  drawTxt(', residente e', 478, 164.5, 8);
+  // Line 2 (y: 158)
+  drawTxt('o nº', 80, 158, 8);
+  drawHLine(98, 158, 208);
+  drawTxt(', RG. Nº', 210, 158, 8);
+  drawHLine(248, 158, 345);
+  drawTxt(', e CNH Nº', 348, 158, 8);
+  drawHLine(402, 158, 475);
+  drawTxt(', residente e', 478, 158, 8);
 
-  drawTxt('domiciliado na', 80, 179, 8);
-  drawHLine(140, 179, 510);
-  drawTxt(',', 512, 179, 8);
+  // Line 3 (y: 171)
+  drawTxt('domiciliado na', 80, 171, 8);
+  drawHLine(142, 171, 510);
+  drawTxt(',', 512, 171, 8);
 
-  drawTxt('CEP', 80, 193.5, 8);
-  drawHLine(102, 193.5, 175);
-  drawTxt(', Bairro', 178, 193.5, 8);
-  drawHLine(210, 193.5, 325);
-  drawTxt(', Município de', 328, 193.5, 8);
-  drawHLine(385, 193.5, 465);
-  drawTxt(', Estado de', 468, 193.5, 8);
+  // Line 4 (y: 184)
+  drawTxt('CEP', 80, 184, 8);
+  drawHLine(102, 184, 175);
+  drawTxt(', Bairro', 178, 184, 8);
+  drawHLine(210, 184, 325);
+  drawTxt(', Município de', 328, 184, 8);
+  drawHLine(385, 184, 465);
+  drawTxt(', Estado de', 468, 184, 8);
 
-  drawHLine(80, 208, 105);
-  drawTxt(', Telefone nº (', 108, 208, 8);
-  drawHLine(162, 208, 180);
-  drawTxt(')', 182, 208, 8);
-  drawHLine(188, 208, 288);
-  drawTxt(', DECLARO, PARA TODOS OS FINS DE', 292, 208, 7.5, true);
+  // Line 5 (y: 197)
+  drawHLine(80, 197, 105);
+  drawTxt(', Telefone nº (', 108, 197, 8);
+  drawHLine(162, 197, 180);
+  drawTxt(')', 182, 197, 8);
+  drawHLine(188, 197, 288);
+  drawTxt(', DECLARO, PARA TODOS OS FINS DE', 292, 197, 7.5, true);
 
-  drawTxt('DIREITO, QUE VENDI, NESTA DATA, O VEÍCULO ABAIXO DESCRITO, DE MINHA PROPRIEDADE,', 80, 222.5, 7.5, true);
-  drawTxt('LIVRE E DESEMBARAÇADO DE QUALQUER ÔNUS, a', 80, 237, 7.5, true);
-  drawHLine(308, 237, 515);
+  // Line 6 (y: 210)
+  drawTxt('DIREITO, QUE VENDI, NESTA DATA, O VEÍCULO ABAIXO DESCRITO, DE MINHA PROPRIEDADE,', 80, 210, 7.5, true);
 
-  drawTxt('inscrita no CNPJ sob o nº', 80, 251.5, 8);
-  drawHLine(188, 251.5, 320);
-  drawTxt(', transferindo-lhe a posse e propriedade do mesmo,', 325, 251.5, 8);
+  // Line 7 (y: 223)
+  drawTxt('LIVRE E DESEMBARAÇADO DE QUALQUER ÔNUS, a', 80, 223, 7.5, true);
+  drawHLine(308, 223, 515);
 
-  drawTxt('bem como toda e qualquer responsabilidade civil e criminal sobre o mesmo.', 80, 266, 8);
+  // Line 8 (y: 236)
+  drawTxt('inscrita no CNPJ sob o nº', 80, 236, 8);
+  drawHLine(188, 236, 320);
 
-  // Linha 1 Veículo
-  drawTxt('Marca', 80, 286, 8);
-  drawHLine(108, 286, 200);
-  drawTxt('Modelo:', 204, 286, 8);
-  drawHLine(240, 286, 350);
-  drawTxt('Ano/Modelo', 354, 286, 8);
-  drawHLine(406, 286, 452);
-  drawTxt('/', 454, 286, 8);
-  drawTxt('Cor:', 462, 286, 8);
-  drawHLine(480, 286, 515);
+  // --- CARACTERÍSTICAS DO VEÍCULO / PROPRIETÁRIO ---
+  drawTxt('CARACTERÍSTICAS DO VEÍCULO / PROPRIETÁRIO', 170, 260, 9, true);
+  drawHLine(170, 261, 425, 0.8);
 
-  // Linha 2 Veículo
-  drawTxt('Placa:', 80, 299, 8);
-  drawHLine(106, 299, 186);
-  drawTxt('Chassi:', 190, 299, 8);
-  drawHLine(224, 299, 515);
+  // Linha 1 Veículo (y: 280)
+  drawTxt('Marca', 80, 280, 8);
+  drawHLine(108, 280, 200);
+  drawTxt('Modelo:', 204, 280, 8);
+  drawHLine(240, 280, 350);
+  drawTxt('Ano/Modelo', 354, 280, 8);
+  drawHLine(406, 280, 452);
+  drawTxt('/', 454, 280, 8);
+  drawTxt('Cor:', 462, 280, 8);
+  drawHLine(480, 280, 515);
 
-  // Linha 3 Proprietário
-  drawTxt('Proprietário:', 80, 312, 8);
-  drawHLine(135, 312, 400);
-  drawTxt('CPF:', 404, 312, 8);
-  drawHLine(428, 312, 515);
+  // Linha 2 Veículo (y: 294)
+  drawTxt('Placa:', 80, 294, 8);
+  drawHLine(106, 294, 186);
+  drawTxt('Chassi', 190, 294, 8);
+  drawHLine(224, 294, 515);
 
-  // Linha 4 Documentos Proprietário
-  drawTxt('RG:', 80, 325, 8);
-  drawHLine(98, 325, 230);
-  drawTxt('UF:', 234, 325, 8);
-  drawHLine(250, 325, 280);
-  drawTxt('.', 282, 325, 8);
+  // Linha 3 Proprietário (y: 308)
+  drawTxt('Proprietário:', 80, 308, 8);
+  drawHLine(135, 308, 400);
+  drawTxt('CPF:', 404, 308, 8);
+  drawHLine(428, 308, 515);
 
-  // --- Termos Legais Fixos ---
-  drawTxt('Declaro, ainda, que:', 80, 345, 7.5, true);
-  drawTxt('- respondo civil e criminalmente pela procedência do veículo, por sua documentação, e por todos os', 80, 356, 7.2);
-  drawTxt('  débitos incidentes sobre o mesmo relativos ao período anterior à data da venda;', 80, 366, 7.2);
-  drawTxt('- não há impedimento de qualquer natureza, judicial ou extrajudicial, para a livre alienação do veículo,', 80, 376, 7.2);
-  drawTxt('  assumindo inteira responsabilidade por eventuais ações, execuções, penhoras, bloqueios, gravames,', 80, 386, 7.2);
-  drawTxt('  dentre outros, anteriores a esta data;', 80, 396, 7.2);
-  drawTxt('- autorizo a compradora a proceder a pesquisas e vistorias cautelares sobre o veículo;', 80, 406, 7.2);
-  drawTxt('- tenho ciência de que caso seja constatado qualquer vício, adulteração no veículo, problemas em sua', 80, 416, 7.2);
-  drawTxt('  documentação, ou qualquer impedimento para a regular transferência de propriedade para a', 80, 426, 7.2);
-  drawTxt('  compradora, a negociação será imediatamente desfeita, com a devolução dos valores pagos, sem prejuízo', 80, 436, 7.2);
-  drawTxt('  da apuração de perdas e danos;', 80, 446, 7.2);
-  drawTxt('- me comprometo a entregar o CRV (Certificado de Registro de Veículo) devidamente preenchido;', 80, 456, 7.2);
-  drawTxt('- me comprometo a pagar os valores relativos aos débitos incidentes sobre o veículo relativos a', 80, 466, 7.2);
-  drawTxt('  período anterior a esta data, assim que cientificado para tal fim, informando, para tanto, o endereço,', 80, 476, 7.2);
-  drawTxt('  telefone e e-mail abaixo, obrigando-me a informar qualquer alteração, ou, de todo modo,', 80, 486, 7.2);
-  drawTxt('  autorizando, desde já, a cobrança por meio de instituição financeira, mediante emissão de boleto', 80, 496, 7.2);
-  drawTxt('  bancário, bem como, em caso de não pagamento ou não localização para envio da cobrança,', 80, 506, 7.2);
-  drawTxt('  protesto e negativação;', 80, 516, 7.2);
-  drawTxt('- no caso de serem os débitos quitados pelo comprador, estou ciente de que este ficará sub-rogado no', 80, 526, 7.2);
-  drawTxt('  direito ao crédito, ficando expressamente convencionado que, se tiver de promover execução judicial ou', 80, 536, 7.2);
-  drawTxt('  cobrança dos valores, estes serão corrigidos e acrescidos de juros moratórios de 1% (um por cento) ao', 80, 546, 7.2);
-  drawTxt('  mês.', 80, 556, 7.2);
+  // Linha 4 Documentos Proprietário (y: 322)
+  drawTxt('RG/UF:', 80, 322, 8);
+  drawHLine(114, 322, 240);
+  drawTxt('/', 244, 322, 8);
+  drawHLine(252, 322, 280);
+  drawTxt('.', 282, 322, 8);
+
+  // --- Declarações Legais (Bullet points) ---
+  drawTxt('Declaro, ainda, que:', 80, 342, 7.5, true);
+
+  // Bullet 1
+  drawTxt('- estou ciente de minha responsabilidade quanto ao veículo ora transacionado, nas esferas civil,', 80, 353, 7.0);
+  drawTxt('  administrativa e criminal, por qualquer evento ocorrido até a presente data;', 80, 361, 7.0);
+
+  // Bullet 2
+  drawTxt('- me obrigo a fornecer, neste ato e a qualquer momento que se fizer necessário, toda e qualquer', 80, 371, 7.0);
+  drawTxt('  documentação para viabilizar a transferência do veículo;', 80, 379, 7.0);
+
+  // Bullet 3
+  drawTxt('- me responsabilizo por todas as infrações, penalidades, multas, taxas, IPVA, tributos e outros débitos', 80, 389, 7.0);
+  drawTxt('  incidentes sobre o veículo até a presente data, ainda que futura ou retroativamente lançados;', 80, 397, 7.0);
+
+  // Bullet 4
+  drawTxt('- em caso de autuação relativa a período anterior a esta data, fico obrigado a, em sendo o caso, indicar o', 80, 407, 7.0);
+  drawTxt('  condutor, fornecer sua CNH e assinar o documento de indicação, no campo específico, assumindo, de todo', 80, 415, 7.0);
+  drawTxt('  modo, integral responsabilidade pela infração e eventuais danos e prejuízos daí decorrentes;', 80, 423, 7.0);
+
+  // Bullet 5
+  drawTxt('- em se tratando se de veículo importado, responsabilizo-me por eventual direito de regresso se sobre ele', 80, 433, 7.0);
+  drawTxt('  recair qualquer ônus ou dívida que possa inviabilizar a sua transferência ao adquirente;', 80, 441, 7.0);
+
+  // Bullet 6 (BOLD & UNDERLINED as in the official document!)
+  drawTxt('- me comprometo a pagar os valores relativos aos débitos incidentes sobre o veículo relativos a', 80, 451, 7.0, true);
+  drawHLine(80, 452, 515, 0.5);
+  drawTxt('  período anterior a esta data, assim que cientificado para tal fim, informando, para tanto, o endereço,', 80, 459, 7.0, true);
+  drawHLine(80, 460, 515, 0.5);
+  drawTxt('  telefone e e-mail abaixo, obrigando-me a informar qualquer alteração, ou, de todo modo,', 80, 467, 7.0, true);
+  drawHLine(80, 468, 515, 0.5);
+  drawTxt('  autorizando, desde já, a cobrança por meio de instituição financeira, mediante emissão de boleto', 80, 475, 7.0, true);
+  drawHLine(80, 476, 515, 0.5);
+  drawTxt('  bancário, bem como, em caso de não pagamento ou não localização para envio da cobrança,', 80, 483, 7.0, true);
+  drawHLine(80, 484, 515, 0.5);
+  drawTxt('  protesto e negativação;', 80, 491, 7.0, true);
+  drawHLine(80, 492, 185, 0.5);
+
+  // Bullet 7
+  drawTxt('- no caso de serem os débitos quitados pelo comprador, estou ciente de que este ficará sub-rogado no', 80, 501, 7.0);
+  drawTxt('  direito ao crédito, ficando expressamente convencionado que, se tiver de promover execução judicial ou', 80, 509, 7.0);
+  drawTxt('  cobrança dos valores, estes serão corrigidos e acrescidos de juros moratórios de 1% (um por cento) ao', 80, 517, 7.0);
+  drawTxt('  mês.', 80, 525, 7.0);
 
   // --- Data ---
-  drawTxt('Por ser verdade, firmo o presente.', 80, 570, 7.5, true);
-  drawTxt('Campinas,', 80, 584, 8);
-  drawHLine(124, 584, 150);
-  drawTxt('de', 154, 584, 8);
-  drawHLine(166, 584, 242);
-  drawTxt('de 20', 246, 584, 8);
-  drawHLine(266, 584, 288);
-  drawTxt('.', 290, 584, 8);
+  drawTxt('Por ser verdade, firmo o presente.', 80, 538, 7.5, true);
+  drawTxt('Campinas,', 80, 546, 8);
+  drawHLine(124, 546, 150);
+  drawTxt('de', 154, 546, 8);
+  drawHLine(166, 546, 242);
+  drawTxt('de 20', 246, 546, 8);
+  drawHLine(266, 546, 288);
+  drawTxt('.', 290, 546, 8);
 
   // Assinatura Proprietário
-  drawHLine(80, 618, 280, 0.6);
-  drawTxt('Proprietário (RECONHECER POR AUTENTICIDADE)', 80, 630, 7.5, true);
+  drawHLine(80, 580, 280, 0.6);
+  drawTxt('Proprietário (RECONHECER POR AUTENTICIDADE)', 80, 592, 7.5, true);
 
   // Box Bottom: Comunicações e Cobranças
   page.drawRectangle({
     x: 75,
-    y: PAGE_HEIGHT - 775,
+    y: PAGE_HEIGHT - 778,
     width: 440,
-    height: 130,
+    height: 153,
     borderColor: lineColor,
     borderWidth: 0.6,
   });
 
-  drawTxt('DADOS PARA EVENTUAIS COMUNICAÇÕES E COBRANÇAS RELATIVAS AO VEÍCULO AQUI', 80, 655, 7.2, true);
-  drawTxt('DESCRITO (não serão utilizados em hipótese alguma para outra finalidade)', 80, 665, 7.2, true);
-  drawHLine(75, 668, 515, 0.6);
+  drawTxt('DADOS PARA EVENTUAIS COMUNICAÇÕES E COBRANÇAS RELATIVAS AO VEÍCULO AQUI', 80, 637, 7.2, true);
+  drawTxt('DESCRITO (não serão utilizados em hipótese alguma para outra finalidade)', 80, 646, 7.2, true);
+  drawHLine(75, 649, 515, 0.6);
 
-  drawTxt('Endereço residencial:', 80, 680, 7.5, true);
-  drawHLine(168, 680, 510);
+  drawTxt('Endereço residencial:', 80, 654, 7.5, true);
+  drawHLine(168, 654, 510);
 
-  drawTxt('Endereço comercial:', 80, 695, 7.5, true);
-  drawHLine(165, 695, 510);
+  drawTxt('Endereço comercial:', 80, 669, 7.5, true);
+  drawHLine(165, 669, 510);
 
-  drawTxt('Telefone com DDD:', 80, 710, 7.5, true);
-  drawHLine(155, 710, 315);
-  drawTxt('WhatsApp:', 320, 710, 7.5, true);
-  drawHLine(368, 710, 510);
+  drawTxt('Telefone com DDD:', 80, 684, 7.5, true);
+  drawHLine(155, 684, 315);
+  drawTxt('WhatsApp:', 320, 684, 7.5, true);
+  drawHLine(368, 684, 510);
 
-  drawTxt('e-mails:', 80, 725, 7.5, true);
-  drawHLine(115, 725, 510);
+  drawTxt('e-mails:', 80, 699, 7.5, true);
+  drawHLine(115, 699, 510);
 
-  drawTxt('Principal condutor:', 80, 740, 7.5, true);
-  drawHLine(152, 740, 510);
+  drawTxt('Principal condutor:', 80, 714, 7.5, true);
+  drawHLine(152, 714, 510);
 
-  drawTxt('CNH do principal condutor:', 80, 755, 7.5, true);
-  drawHLine(182, 755, 342);
-  drawTxt('CPF:', 346, 755, 7.5, true);
-  drawHLine(368, 755, 510);
+  drawTxt('CNH do principal condutor:', 80, 729, 7.5, true);
+  drawHLine(182, 729, 342);
+  drawTxt('CPF:', 346, 729, 7.5, true);
+  drawHLine(368, 729, 510);
 
-  drawTxt('*arquivar cópia dos documentos e comprovantes', 80, 767, 6);
+  drawTxt('*arquivar cópia dos documentos e comprovantes', 80, 741, 6);
 
-  // Assinatura Declarante
-  drawHLine(210, 792, 385, 0.6);
-  drawTxt('Nome e assinatura do declarante', 228, 802, 7.5, true);
+  // Assinatura Declarante dentro da caixa
+  drawHLine(180, 762, 410, 0.6);
+  drawTxt('Nome e assinatura do declarante', 232, 772, 7.5, true);
 
   return await pdfDoc.save();
 }
@@ -270,8 +300,8 @@ export async function generateMasterCartaCancelamentoPdf(): Promise<Uint8Array> 
   drawTxt('LTDA, por motivos pessoais.', 80, 275, 9.5, true);
 
   drawTxt('Solicito devolução integral do pagamento efetuado via', 80, 295, 9.5, true);
-  drawHLine(308, 295, 506, 0.6);
-  drawTxt('.', 508, 295, 9.5);
+  drawHLine(348, 295, 508, 0.6);
+  drawTxt('.', 510, 295, 9.5);
 
   drawTxt('Sem mais,', 80, 345, 9.5);
 
@@ -303,63 +333,69 @@ export async function generateMasterDacaoPagamentoPdf(): Promise<Uint8Array> {
   const drawHLine = (x1: number, yFromTop: number, x2: number, width = 0.6, color = lineColor) =>
     drawHLineHelper(page, x1, yFromTop, x2, width, color);
 
-  const boxX = 60;
-  const boxWidth = 475;
-  const splitColX = 82;
+  const boxX = 64;
+  const boxWidth = 467.28;
+  const splitColX = 88;
 
   // 1. Moldura externa com cantos arredondados cobrindo toda a página
-  // Desenha moldura perimetral precisa
-  const frameX = 45;
-  const frameY = 32;
-  const frameW = PAGE_WIDTH - 90;
-  const frameH = PAGE_HEIGHT - 64;
-  const cornerR = 24;
+  const frameX = 50;
+  const frameY = 40;
+  const frameW = 495.28;
+  const frameH = 760;
+  const cornerR = 40;
+
+  // Badge capsule dimensions
+  const badgeW = 240;
+  const badgeH = 22;
+  const badgeX = (PAGE_WIDTH - badgeW) / 2;
+  const badgeY = frameY - 11;
+  const badgeR = 11;
 
   // Top line (interrompida no centro para o badge)
   page.drawLine({
     start: { x: frameX + cornerR, y: PAGE_HEIGHT - frameY },
-    end: { x: 175, y: PAGE_HEIGHT - frameY },
-    thickness: 1.0,
+    end: { x: badgeX - 3, y: PAGE_HEIGHT - frameY },
+    thickness: 0.9,
     color: lineColor,
   });
   page.drawLine({
-    start: { x: 420, y: PAGE_HEIGHT - frameY },
+    start: { x: badgeX + badgeW + 3, y: PAGE_HEIGHT - frameY },
     end: { x: frameX + frameW - cornerR, y: PAGE_HEIGHT - frameY },
-    thickness: 1.0,
+    thickness: 0.9,
     color: lineColor,
   });
   // Right line
   page.drawLine({
     start: { x: frameX + frameW, y: PAGE_HEIGHT - (frameY + cornerR) },
     end: { x: frameX + frameW, y: frameY + cornerR },
-    thickness: 1.0,
+    thickness: 0.9,
     color: lineColor,
   });
   // Bottom line
   page.drawLine({
     start: { x: frameX + cornerR, y: frameY },
     end: { x: frameX + frameW - cornerR, y: frameY },
-    thickness: 1.0,
+    thickness: 0.9,
     color: lineColor,
   });
   // Left line
   page.drawLine({
     start: { x: frameX, y: PAGE_HEIGHT - (frameY + cornerR) },
     end: { x: frameX, y: frameY + cornerR },
-    thickness: 1.0,
+    thickness: 0.9,
     color: lineColor,
   });
 
   // Arcos dos 4 cantos da moldura externa
   const drawCornerArc = (cx: number, cy: number, startAngle: number) => {
-    const steps = 10;
+    const steps = 18;
     for (let i = 0; i < steps; i++) {
       const a1 = startAngle + (i * Math.PI) / (2 * steps);
       const a2 = startAngle + ((i + 1) * Math.PI) / (2 * steps);
       page.drawLine({
         start: { x: cx + cornerR * Math.cos(a1), y: cy + cornerR * Math.sin(a1) },
         end: { x: cx + cornerR * Math.cos(a2), y: cy + cornerR * Math.sin(a2) },
-        thickness: 1.0,
+        thickness: 0.9,
         color: lineColor,
       });
     }
@@ -369,25 +405,55 @@ export async function generateMasterDacaoPagamentoPdf(): Promise<Uint8Array> {
   drawCornerArc(frameX + frameW - cornerR, frameY + cornerR, (3 * Math.PI) / 2); // Bottom-Right
   drawCornerArc(frameX + cornerR, frameY + cornerR, Math.PI); // Bottom-Left
 
-  // 2. Title Pill Badge no topo
-  const badgeW = 240;
-  const badgeH = 22;
-  const badgeX = (PAGE_WIDTH - badgeW) / 2;
-  const badgeY = frameY - 11;
-
+  // 2. Title Pill Badge no topo com cantos arredondados
+  page.drawRectangle({
+    x: badgeX + badgeR,
+    y: PAGE_HEIGHT - (badgeY + badgeH),
+    width: badgeW - 2 * badgeR,
+    height: badgeH,
+    color: rgb(1, 1, 1),
+  });
   page.drawRectangle({
     x: badgeX,
-    y: PAGE_HEIGHT - (badgeY + badgeH),
+    y: PAGE_HEIGHT - (badgeY + badgeH) + badgeR,
     width: badgeW,
-    height: badgeH,
-    color: rgb(1, 1, 1), // fundo branco
-    borderColor: lineColor,
-    borderWidth: 1.0,
+    height: badgeH - 2 * badgeR,
+    color: rgb(1, 1, 1),
   });
-  drawTxt('DECLARAÇÃO DE DAÇÃO EM PAGAMENTO DE VEÍCULO', badgeX + 10, badgeY + 15, 8.5, true);
+  page.drawLine({
+    start: { x: badgeX + badgeR, y: PAGE_HEIGHT - badgeY },
+    end: { x: badgeX + badgeW - badgeR, y: PAGE_HEIGHT - badgeY },
+    thickness: 0.9,
+    color: lineColor,
+  });
+  page.drawLine({
+    start: { x: badgeX + badgeR, y: PAGE_HEIGHT - (badgeY + badgeH) },
+    end: { x: badgeX + badgeW - badgeR, y: PAGE_HEIGHT - (badgeY + badgeH) },
+    thickness: 0.9,
+    color: lineColor,
+  });
+  const drawBadgeArc = (cx: number, cy: number, startAngle: number) => {
+    const steps = 12;
+    for (let i = 0; i < steps; i++) {
+      const a1 = startAngle + (i * Math.PI) / (2 * steps);
+      const a2 = startAngle + ((i + 1) * Math.PI) / (2 * steps);
+      page.drawLine({
+        start: { x: cx + badgeR * Math.cos(a1), y: cy + badgeR * Math.sin(a1) },
+        end: { x: cx + badgeR * Math.cos(a2), y: cy + badgeR * Math.sin(a2) },
+        thickness: 0.9,
+        color: lineColor,
+      });
+    }
+  };
+  drawBadgeArc(badgeX + badgeR, PAGE_HEIGHT - (badgeY + badgeR), Math.PI / 2); // Top-Left
+  drawBadgeArc(badgeX + badgeW - badgeR, PAGE_HEIGHT - (badgeY + badgeR), 0); // Top-Right
+  drawBadgeArc(badgeX + badgeW - badgeR, PAGE_HEIGHT - (badgeY + badgeH - badgeR), (3 * Math.PI) / 2); // Bottom-Right
+  drawBadgeArc(badgeX + badgeR, PAGE_HEIGHT - (badgeY + badgeH - badgeR), Math.PI); // Bottom-Left
+
+  drawTxt('DECLARAÇÃO DE DAÇÃO EM PAGAMENTO DE VEÍCULO', badgeX + 13, badgeY + 14.5, 7.8, true);
 
   // 3. BOX 1: PROPRIETÁRIO
-  const b1Y = 70;
+  const b1Y = 72;
   const b1H = 66;
   page.drawRectangle({
     x: boxX,
@@ -395,149 +461,154 @@ export async function generateMasterDacaoPagamentoPdf(): Promise<Uint8Array> {
     width: boxWidth,
     height: b1H,
     borderColor: lineColor,
-    borderWidth: 0.8,
+    borderWidth: 0.7,
   });
   // Linha vertical do identificador
   page.drawLine({
     start: { x: splitColX, y: PAGE_HEIGHT - b1Y },
     end: { x: splitColX, y: PAGE_HEIGHT - (b1Y + b1H) },
-    thickness: 0.8,
+    thickness: 0.7,
     color: lineColor,
   });
   // Texto vertical 'proprietário'
   page.drawText('proprietário', {
-    x: 74,
+    x: 76,
     y: PAGE_HEIGHT - (b1Y + 58),
-    size: 7.5,
+    size: 7.2,
     font: fontBold,
     color: darkText,
     rotate: { type: 'degrees' as any, angle: 90 },
   });
 
-  // Linhas horizontais e verticais internas do Box 1
-  drawHLine(splitColX, b1Y + 22, boxX + boxWidth, 0.6);
-  drawHLine(splitColX, b1Y + 44, boxX + boxWidth, 0.6);
+  // Linhas horizontais internas do Box 1
+  drawHLine(splitColX, b1Y + 22, boxX + boxWidth, 0.5);
+  drawHLine(splitColX, b1Y + 44, boxX + boxWidth, 0.5);
 
   // Linhas verticais separadoras
+  const colDiv1X = 300;
   page.drawLine({
-    start: { x: 310, y: PAGE_HEIGHT - (b1Y + 22) },
-    end: { x: 310, y: PAGE_HEIGHT - (b1Y + 44) },
-    thickness: 0.6,
+    start: { x: colDiv1X, y: PAGE_HEIGHT - (b1Y + 22) },
+    end: { x: colDiv1X, y: PAGE_HEIGHT - (b1Y + 44) },
+    thickness: 0.5,
     color: lineColor,
   });
   page.drawLine({
-    start: { x: 310, y: PAGE_HEIGHT - (b1Y + 44) },
-    end: { x: 310, y: PAGE_HEIGHT - (b1Y + b1H) },
-    thickness: 0.6,
+    start: { x: colDiv1X, y: PAGE_HEIGHT - (b1Y + 44) },
+    end: { x: colDiv1X, y: PAGE_HEIGHT - (b1Y + b1H) },
+    thickness: 0.5,
     color: lineColor,
   });
 
   // Labels Box 1
-  drawTxt('Eu,', splitColX + 5, b1Y + 15, 8);
-  drawTxt('portador do RG nº:', splitColX + 5, b1Y + 36, 8);
-  drawTxt('e do CPF nº', 315, b1Y + 36, 8);
-  drawTxt('Estado Civil', splitColX + 5, b1Y + 58, 8);
-  drawTxt('Profissão:', 315, b1Y + 58, 8);
+  drawTxt('Eu,', splitColX + 5, b1Y + 15, 7.8);
+  drawTxt('portador do RG nº:', splitColX + 5, b1Y + 37, 7.8);
+  drawTxt('e do CPF nº', colDiv1X + 5, b1Y + 37, 7.8);
+  drawTxt('Estado Civil', splitColX + 5, b1Y + 59, 7.8);
+  drawTxt('Profissão:', colDiv1X + 5, b1Y + 59, 7.8);
 
   // 4. Section 1 Header
-  drawTxt('DECLARO sob minha total responsabilidade dar em pagamento o veículo', boxX, b1Y + b1H + 13, 8, true);
+  drawTxt('DECLARO sob minha total responsabilidade dar em pagamento o veículo', boxX, 154, 7.8, true);
 
   // 5. BOX 2: VEÍCULO USADO
-  const b2Y = b1Y + b1H + 18;
-  const b2H = 46;
+  const b2Y = 172;
+  const b2H = 44;
   page.drawRectangle({
     x: boxX,
     y: PAGE_HEIGHT - (b2Y + b2H),
     width: boxWidth,
     height: b2H,
     borderColor: lineColor,
-    borderWidth: 0.8,
+    borderWidth: 0.7,
   });
   page.drawLine({
     start: { x: splitColX, y: PAGE_HEIGHT - b2Y },
     end: { x: splitColX, y: PAGE_HEIGHT - (b2Y + b2H) },
-    thickness: 0.8,
+    thickness: 0.7,
     color: lineColor,
   });
   page.drawText('veículo usado', {
-    x: 74,
-    y: PAGE_HEIGHT - (b2Y + 42),
-    size: 7,
-    font: fontBold,
-    color: darkText,
-    rotate: { type: 'degrees' as any, angle: 90 },
-  });
-
-  drawHLine(splitColX, b2Y + 23, boxX + boxWidth, 0.6);
-  // Verticais na linha 1 do usado
-  page.drawLine({
-    start: { x: 195, y: PAGE_HEIGHT - b2Y },
-    end: { x: 195, y: PAGE_HEIGHT - (b2Y + 23) },
-    thickness: 0.6,
-    color: lineColor,
-  });
-  page.drawLine({
-    start: { x: 310, y: PAGE_HEIGHT - b2Y },
-    end: { x: 310, y: PAGE_HEIGHT - (b2Y + 23) },
-    thickness: 0.6,
-    color: lineColor,
-  });
-
-  drawTxt('Placa:', splitColX + 5, b2Y + 15, 8);
-  drawTxt('Ano Fabricação:', 200, b2Y + 15, 8);
-  drawTxt('Marca', 315, b2Y + 15, 8);
-  drawTxt('Chassi:', splitColX + 5, b2Y + 38, 8);
-
-  // 6. Section 2 Header
-  drawTxt('objetivando realizar o pagamento parcial do veículo', boxX, b2Y + b2H + 13, 8, true);
-
-  // 7. BOX 3: VEÍCULO ADQUIRIDO
-  const b3Y = b2Y + b2H + 18;
-  const b3H = 46;
-  page.drawRectangle({
-    x: boxX,
-    y: PAGE_HEIGHT - (b3Y + b3H),
-    width: boxWidth,
-    height: b3H,
-    borderColor: lineColor,
-    borderWidth: 0.8,
-  });
-  page.drawLine({
-    start: { x: splitColX, y: PAGE_HEIGHT - b3Y },
-    end: { x: splitColX, y: PAGE_HEIGHT - (b3Y + b3H) },
-    thickness: 0.8,
-    color: lineColor,
-  });
-  page.drawText('veículo adquirido', {
-    x: 74,
-    y: PAGE_HEIGHT - (b3Y + 44),
+    x: 76,
+    y: PAGE_HEIGHT - (b2Y + 40),
     size: 6.8,
     font: fontBold,
     color: darkText,
     rotate: { type: 'degrees' as any, angle: 90 },
   });
 
-  drawHLine(splitColX, b3Y + 23, boxX + boxWidth, 0.6);
+  drawHLine(splitColX, b2Y + 22, boxX + boxWidth, 0.5);
+  // Verticais na linha 1 do usado
+  const uCol1X = 158;
+  const uCol2X = 285;
   page.drawLine({
-    start: { x: 195, y: PAGE_HEIGHT - b3Y },
-    end: { x: 195, y: PAGE_HEIGHT - (b3Y + 23) },
-    thickness: 0.6,
+    start: { x: uCol1X, y: PAGE_HEIGHT - b2Y },
+    end: { x: uCol1X, y: PAGE_HEIGHT - (b2Y + 22) },
+    thickness: 0.5,
     color: lineColor,
   });
   page.drawLine({
-    start: { x: 310, y: PAGE_HEIGHT - b3Y },
-    end: { x: 310, y: PAGE_HEIGHT - (b3Y + 23) },
-    thickness: 0.6,
+    start: { x: uCol2X, y: PAGE_HEIGHT - b2Y },
+    end: { x: uCol2X, y: PAGE_HEIGHT - (b2Y + 22) },
+    thickness: 0.5,
     color: lineColor,
   });
 
-  drawTxt('Placa:', splitColX + 5, b3Y + 15, 8);
-  drawTxt('Ano:', 200, b3Y + 15, 8);
-  drawTxt('Marca / Modelo:', 315, b3Y + 15, 8);
-  drawTxt('Chassi:', splitColX + 5, b3Y + 38, 8);
+  drawTxt('Placa:', splitColX + 5, b2Y + 15, 7.8);
+  drawTxt('Ano Fabricação:', uCol1X + 4, b2Y + 15, 7.8);
+  drawTxt('Marca', uCol2X + 5, b2Y + 15, 7.8);
+  drawTxt('Chassi:', splitColX + 5, b2Y + 37, 7.8);
+
+  // 6. Section 2 Header
+  drawTxt('objetivando realizar o pagamento parcial do veículo', boxX, 232, 7.8, true);
+
+  // 7. BOX 3: VEÍCULO ADQUIRIDO
+  const b3Y = 250;
+  const b3H = 44;
+  page.drawRectangle({
+    x: boxX,
+    y: PAGE_HEIGHT - (b3Y + b3H),
+    width: boxWidth,
+    height: b3H,
+    borderColor: lineColor,
+    borderWidth: 0.7,
+  });
+  page.drawLine({
+    start: { x: splitColX, y: PAGE_HEIGHT - b3Y },
+    end: { x: splitColX, y: PAGE_HEIGHT - (b3Y + b3H) },
+    thickness: 0.7,
+    color: lineColor,
+  });
+  page.drawText('veículo adquirido', {
+    x: 76,
+    y: PAGE_HEIGHT - (b3Y + 41),
+    size: 6.6,
+    font: fontBold,
+    color: darkText,
+    rotate: { type: 'degrees' as any, angle: 90 },
+  });
+
+  drawHLine(splitColX, b3Y + 22, boxX + boxWidth, 0.5);
+  const aCol1X = 158;
+  const aCol2X = 285;
+  page.drawLine({
+    start: { x: aCol1X, y: PAGE_HEIGHT - b3Y },
+    end: { x: aCol1X, y: PAGE_HEIGHT - (b3Y + 22) },
+    thickness: 0.5,
+    color: lineColor,
+  });
+  page.drawLine({
+    start: { x: aCol2X, y: PAGE_HEIGHT - b3Y },
+    end: { x: aCol2X, y: PAGE_HEIGHT - (b3Y + 22) },
+    thickness: 0.5,
+    color: lineColor,
+  });
+
+  drawTxt('Placa:', splitColX + 5, b3Y + 15, 7.8);
+  drawTxt('Ano:', aCol1X + 4, b3Y + 15, 7.8);
+  drawTxt('Marca / Modelo:', aCol2X + 5, b3Y + 15, 7.8);
+  drawTxt('Chassi:', splitColX + 5, b3Y + 37, 7.8);
 
   // 8. BOX 4: COMPRADOR
-  const b4Y = b3Y + b3H + 6;
+  const b4Y = 310;
   const b4H = 22;
   page.drawRectangle({
     x: boxX,
@@ -545,60 +616,61 @@ export async function generateMasterDacaoPagamentoPdf(): Promise<Uint8Array> {
     width: boxWidth,
     height: b4H,
     borderColor: lineColor,
-    borderWidth: 0.8,
+    borderWidth: 0.7,
   });
+  const buyerColDivX = 180;
   page.drawLine({
-    start: { x: 195, y: PAGE_HEIGHT - b4Y },
-    end: { x: 195, y: PAGE_HEIGHT - (b4Y + b4H) },
-    thickness: 0.8,
+    start: { x: buyerColDivX, y: PAGE_HEIGHT - b4Y },
+    end: { x: buyerColDivX, y: PAGE_HEIGHT - (b4Y + b4H) },
+    thickness: 0.7,
     color: lineColor,
   });
-  drawTxt('neste ato adquirido por', boxX + 10, b4Y + 15, 8, true);
-  drawTxt('Comprador:', 200, b4Y + 15, 8);
+  drawTxt('neste ato adquirido por', boxX + 8, b4Y + 14.5, 7.8, true);
+  drawTxt('Comprador:', buyerColDivX + 5, b4Y + 14.5, 7.8);
 
   // 9. Legal Paragraphs
-  const legY = b4Y + b4H + 14;
-  drawTxt(', que conjuntamente assume ampla responsabilidade solidária e é autorizado a receber eventuais valores provenientes da', boxX, legY, 7.3);
-  drawTxt('negociação junto à DAHRUJ MOTORS LTDA , seja a que título for.', boxX, legY + 11, 7.3);
+  const legY = 348;
+  drawTxt(', que conjuntamente assume ampla responsabilidade solidária e é autorizado a receber eventuais valores provenientes da', boxX, legY, 7.2);
+  drawTxt('negociação junto à DAHRUJ MOTORS LTDA , seja a que título for.', boxX, legY + 10.5, 7.2);
 
-  drawTxt('Declaro, também, sob as penas da lei, que o veículo objeto da dação em pagamento se encontra totalmente livre e desembaraçado', boxX, legY + 26, 7.3);
-  drawTxt('de quaisquer ônus, dívida real, pessoal, fiscal ou extrajudicial, penhora, arresto ou sequestro, ou ainda restrições ou constrições de', boxX, legY + 37, 7.3);
-  drawTxt('qualquer natureza, em especial em razão de qualquer processo judicial.', boxX, legY + 48, 7.3);
+  drawTxt('Declaro, também, sob as penas da lei, que o veículo objeto da dação em pagamento se encontra totalmente livre e desembaraçado', boxX, legY + 25, 7.2);
+  drawTxt('de quaisquer ônus, dívida real, pessoal, fiscal ou extrajudicial, penhora, arresto ou sequestro, ou ainda restrições ou constrições de', boxX, legY + 35.5, 7.2);
+  drawTxt('qualquer natureza, em especial em razão de qualquer processo judicial.', boxX, legY + 46, 7.2);
 
-  drawTxt('Assumo em meu nome, pelo veículo dado em pagamento, a mais ampla e irrestrita responsabilidade, especialmente, mas não', boxX, legY + 63, 7.3);
-  drawTxt('limitado, quanto aos seguintes ônus:', boxX, legY + 74, 7.3);
+  drawTxt('Assumo em meu nome, pelo veículo dado em pagamento, a mais ampla e irrestrita responsabilidade, especialmente, mas não', boxX, legY + 60.5, 7.2);
+  drawTxt('limitado, quanto aos seguintes ônus:', boxX, legY + 71, 7.2);
 
   // Bullet 1
-  page.drawCircle({ x: boxX + 12, y: PAGE_HEIGHT - (legY + 95), size: 2.2, color: darkText });
-  drawTxt('Débito ou dívida direta ou indireta contraída por mim e que pese ou venha a pesar sobre o mesmo; multas de', boxX + 22, legY + 92, 7.3, true);
-  drawTxt('trânsito de qualquer gravidade e ou valor que tenham sido geradas até a presente data;', boxX + 22, legY + 103, 7.3, true);
+  page.drawCircle({ x: boxX + 11, y: PAGE_HEIGHT - (legY + 91), size: 2.2, color: darkText });
+  drawTxt('Débito ou dívida direta ou indireta contraída por mim e que pese ou venha a pesar sobre o mesmo; multas de', boxX + 20, legY + 89, 7.2, true);
+  drawTxt('trânsito de qualquer gravidade e ou valor que tenham sido geradas até a presente data;', boxX + 20, legY + 99.5, 7.2, true);
 
   // Bullet 2
-  page.drawCircle({ x: boxX + 12, y: PAGE_HEIGHT - (legY + 121), size: 2.2, color: darkText });
-  drawTxt('Penhora, arrestos, sequestros ou quaisquer outras constrições que possam vir a pesar sobre o veículo, seja a', boxX + 22, legY + 118, 7.3, true);
-  drawTxt('que título ou tempo for, decorrente ou não de processo judicial;', boxX + 22, legY + 129, 7.3, true);
+  page.drawCircle({ x: boxX + 11, y: PAGE_HEIGHT - (legY + 117), size: 2.2, color: darkText });
+  drawTxt('Penhora, arrestos, sequestros ou quaisquer outras constrições que possam vir a pesar sobre o veículo, seja a', boxX + 20, legY + 115, 7.2, true);
+  drawTxt('que título ou tempo for, decorrente ou não de processo judicial;', boxX + 20, legY + 125.5, 7.2, true);
 
   // Bullet 3
-  page.drawCircle({ x: boxX + 12, y: PAGE_HEIGHT - (legY + 147), size: 2.2, color: darkText });
-  drawTxt('Toda e qualquer responsabilidade civil ou criminal.', boxX + 22, legY + 144, 7.3, true);
+  page.drawCircle({ x: boxX + 11, y: PAGE_HEIGHT - (legY + 143), size: 2.2, color: darkText });
+  drawTxt('Toda e qualquer responsabilidade civil ou criminal.', boxX + 20, legY + 141, 7.2, true);
 
   // Long legal paragraph
-  const pY = legY + 162;
-  drawTxt('Em recaindo sobre o veículo qualquer tipo de cobrança (judicial ou extrajudicial) ou qualquer tipo de constrição judicial e ou', boxX, pY, 7.1);
-  drawTxt('administrativa, que venha de qualquer forma, ainda que parcialmente, comprometer ou limitar sua plena, livre e ilimitada', boxX, pY + 10, 7.1);
-  drawTxt('disposição, utilização ou comercialização, obrigo-me a adotar todas as providências necessárias e indicadas para sua IMEDIATA', boxX, pY + 20, 7.1);
-  drawTxt('liberação e completa isenção de responsabilidade da DAHRUJ MOTORS LTDA, seja pagando a integridade do débito, seja através de', boxX, pY + 30, 7.1);
-  drawTxt('qualquer outro meio eficaz, providências estas que deverão ocorrer dentro de um prazo máximo de 24 horas da efetivação da', boxX, pY + 40, 7.1);
-  drawTxt('cientificação, o que ocorrerá por qualquer meio de comunicação, sob pena de responder por todas as perdas e danos decorrentes, além', boxX, pY + 50, 7.1);
-  drawTxt('de multa diária ora estabelecida no valor de R$1.000,00(hum mil reais), além de juros mensais de 1%, correção monetária com base', boxX, pY + 60, 7.1);
-  drawTxt('no índice CDI e honorários advocatícios de 20% se necessária providência judicial. Pelas obrigações acima assumidas, ofereço ainda', boxX, pY + 70, 7.1);
-  drawTxt('ampla garantia fidejussória. Estas obrigações constituem-se em direito líquido, certo e exigível da DAHRUJ MOTORS LTDA , podendo', boxX, pY + 80, 7.1);
-  drawTxt('ser exercido através de ação executiva.', boxX, pY + 90, 7.1);
+  const pY = legY + 154;
+  drawTxt('Em recaindo sobre o veículo qualquer tipo de cobrança (judicial ou extrajudicial) ou qualquer tipo de constrição judicial e ou', boxX, pY, 7.0);
+  drawTxt('administrativa, que venha de qualquer forma, ainda que parcialmente, comprometer ou limitar sua plena, livre e ilimitada', boxX, pY + 9.5, 7.0);
+  drawTxt('disposição, utilização ou comercialização, obrigo-me a adotar todas as providências necessárias e indicadas para sua IMEDIATA', boxX, pY + 19, 7.0);
+  drawTxt('liberação e completa isenção de responsabilidade da DAHRUJ MOTORS LTDA, seja pagando a integridade do débito, seja através de', boxX, pY + 28.5, 7.0);
+  drawTxt('qualquer outro meio eficaz, providências estas que deverão ocorrer dentro de um prazo máximo de 24 horas da efetivação da', boxX, pY + 38, 7.0);
+  drawTxt('cientificação, o que ocorrerá por qualquer meio de comunicação, sob pena de responder por todas as perdas e danos decorrentes, além', boxX, pY + 47.5, 7.0);
+  drawTxt('de multa diária ora estabelecida no valor de R$1.000,00(hum mil reais), além de juros mensais de 1%, correção monetária com base', boxX, pY + 57, 7.0);
+  drawTxt('no índice CDI e honorários advocatícios de 20% se necessária providência judicial. Pelas obrigações acima assumidas, ofereço ainda', boxX, pY + 66.5, 7.0);
+  drawTxt('ampla garantia fidejussória. Estas obrigações constituem-se em direito líquido, certo e exigível da DAHRUJ MOTORS LTDA , podendo', boxX, pY + 76, 7.0);
+  drawTxt('ser exercido através de ação executiva.', boxX, pY + 85.5, 7.0);
 
   // 10. Date Box
-  const dateBoxX = 295;
-  const dateBoxY = pY + 106;
-  const dateBoxW = 240;
+  const dateBoxX = 311;
+  const dateBoxY = 600;
+  const dateBoxW = 220;
   const dateBoxH = 19;
   page.drawRectangle({
     x: dateBoxX,
@@ -608,14 +680,16 @@ export async function generateMasterDacaoPagamentoPdf(): Promise<Uint8Array> {
     borderColor: lineColor,
     borderWidth: 0.7,
   });
-  drawTxt('Data:', dateBoxX + 4, dateBoxY + 8, 5.5);
-  drawTxt('Campinas,', dateBoxX + 22, dateBoxY + 13, 7.5);
+  drawTxt('Data:', dateBoxX + 4, dateBoxY + 7.5, 5.5);
+  drawTxt('Campinas,', dateBoxX + 20, dateBoxY + 13, 7.5);
 
   // 11. Signature Block
-  const sigY = dateBoxY + 58;
-  drawHLine(145, sigY, 395, 0.8);
-  drawTxt('Assinatura - do proprietário', 215, sigY + 12, 8.5, true);
-  drawTxt('reconhecer por autenticidade', 222, sigY + 22, 7.2);
+  const sigY = 665;
+  const sigW = 270;
+  const sigX = 163;
+  drawHLine(sigX, sigY, sigX + sigW, 0.8);
+  drawTxt('Assinatura - do proprietário', sigX + 61, sigY + 12, 8.0, true);
+  drawTxt('reconhecer por autenticidade', sigX + 67, sigY + 21, 6.8);
 
   return await pdfDoc.save();
 }
@@ -945,6 +1019,411 @@ export async function generateMasterFormularioDevolucaoPdf(): Promise<Uint8Array
   return await pdfDoc.save();
 }
 
+// 7. INSTRUMENTO PARTICULAR DE COMODATO DE VEÍCULO (7 PÁGINAS)
+export async function generateMasterComodatoVeiculoPdf(): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const createPageHelpers = (page: any) => {
+    const drawTxt = (text: string, x: number, yFromTop: number, size = 8.5, isBold = false) => {
+      drawTextHelper(page, fontRegular, fontBold, text, x, yFromTop, size, isBold, darkText);
+    };
+    const drawHLine = (x1: number, yFromTop: number, x2: number, width = 0.6) => {
+      drawHLineHelper(page, x1, yFromTop, x2, width, lineColor);
+    };
+    return { drawTxt, drawHLine };
+  };
+
+  // ===================== PÁGINA 1 =====================
+  const page1 = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const p1 = createPageHelpers(page1);
+
+  // Título
+  p1.drawTxt('INSTRUMENTO PARTICULAR DE COMODATO DE VEÍCULO', 130, 85, 10, true);
+
+  // Preâmbulo
+  p1.drawTxt('Por este instrumento particular, de um lado CMD GW COMERCIO DE VEÍCULOS', 70, 155, 8.5);
+  p1.drawTxt('AUTOMOTORES LTDA., pessoa jurídica de direito privado, pessoa jurídica de direito', 70, 169, 8.5);
+  p1.drawTxt('priva538-56do, devidamente constituída e inscrita no CNPJ/MF sob o nº. 48.967.629/0004-84,', 70, 183, 8.5);
+  p1.drawTxt('com sede em JUNDIAÍ, na AV NOVE DE JULHO, 380 - Jundiaí, CEP 13209-010,', 70, 197, 8.5);
+  
+  p1.drawTxt('aqui denominado simplesmente COMODANTE, e, de outro lado', 70, 211, 8.5);
+  p1.drawHLine(345, 211, 520, 0.6);
+
+  p1.drawTxt('portador(a) da Cédula de Identidade nº', 70, 225, 8.5);
+  p1.drawHLine(235, 225, 345, 0.6);
+
+  p1.drawTxt(', inscrito(a) no CPF sob o nº', 70, 239, 8.5);
+  p1.drawHLine(185, 239, 335, 0.6);
+  p1.drawTxt(', residente e domiciliado(a)', 340, 239, 8.5);
+
+  p1.drawTxt('na Cidade de', 70, 253, 8.5);
+  p1.drawHLine(125, 253, 215, 0.6);
+  p1.drawTxt(', Estado S. PAULO, na', 218, 253, 8.5);
+  p1.drawHLine(320, 253, 495, 0.6);
+  p1.drawTxt(',', 497, 253, 8.5);
+  p1.drawHLine(500, 253, 525, 0.6);
+
+  p1.drawTxt('Bairro:', 70, 267, 8.5);
+  p1.drawHLine(105, 267, 225, 0.6);
+  p1.drawTxt('Cep:', 228, 267, 8.5);
+  p1.drawHLine(255, 267, 335, 0.6);
+  p1.drawTxt('aqui simplesmente denominada COMODATÁRIA,', 340, 267, 8.5);
+
+  // Cláusula 1
+  p1.drawTxt('1. A COMODANTE é proprietária do veículo', 70, 320, 8.5);
+  p1.drawHLine(260, 320, 450, 0.6);
+  p1.drawTxt(',', 452, 320, 8.5);
+  p1.drawHLine(455, 320, 483, 0.6);
+  p1.drawTxt('/', 485, 320, 8.5);
+  p1.drawHLine(490, 320, 520, 0.6);
+  p1.drawTxt(',', 522, 320, 8.5);
+
+  p1.drawTxt('COR', 70, 334, 8.5);
+  p1.drawHLine(100, 334, 165, 0.6);
+  p1.drawTxt('PLACA', 170, 334, 8.5);
+  p1.drawHLine(205, 334, 300, 0.6);
+  p1.drawTxt(', e neste ato, por este instrumento concede o mesmo a', 305, 334, 8.5);
+
+  p1.drawTxt('título de COMODATO, por período indeterminado, a contar da data deste instrumento,', 70, 360, 8.5);
+  p1.drawTxt('para uso da COMODATÁRIA.', 70, 374, 8.5);
+
+  // Cláusula 2
+  p1.drawTxt('2. O veículo definido na cláusula 1º deste ficará na posse da própria COMODATÁRIA,', 70, 415, 8.5);
+  p1.drawTxt('podendo a mesma usar e gozar do bem da forma que melhor lhe convir, sendo-lhe', 70, 429, 8.5);
+  p1.drawTxt('apenas vedado à locação e a alienação a outrem sem expressa autorização da', 70, 443, 8.5);
+  p1.drawTxt('COMODANTE.', 70, 457, 8.5);
+
+  // Cláusula 2.A
+  p1.drawTxt('2.A. A COMODATÁRIA obriga-se a utilizar do veículo somente com condutores', 70, 510, 8.5);
+  p1.drawTxt('devidamente habilitados, se comprometendo ainda a fornecer, quando solicitada, no', 70, 524, 8.5);
+  p1.drawTxt('prazo máximo de 24 horas a Carteira Nacional de Habilitação de condutor que', 70, 538, 8.5);
+  p1.drawTxt('eventualmente cometa infrações.', 70, 552, 8.5);
+
+  // Cláusula 3
+  p1.drawTxt('3. A COMODATÁRIA obriga-se a reembolsar a COMODANTE, de todas as despesas', 70, 605, 8.5);
+  p1.drawTxt('havidas com o veículo, tais como eventuais taxas e infrações de trânsito que venham', 70, 619, 8.5);
+  p1.drawTxt('recair sobre o bem, e ainda eventuais sinistros ocorridos que causem danos ao próprio', 70, 633, 8.5);
+  p1.drawTxt('bem ou a terceiros durante o período de vigência deste instrumento.', 70, 647, 8.5);
+
+  // Cláusula 4
+  p1.drawTxt('4. A COMODATÁRIA obriga-se a efetuar o pagamento do valor estabelecido a época dos', 70, 700, 8.5);
+  p1.drawTxt('fatos pela Tabela Fipe, nos casos de furto, roubo e ou perda total do veículo objeto do', 70, 714, 8.5);
+
+  // ===================== PÁGINA 2 =====================
+  const page2 = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const p2 = createPageHelpers(page2);
+
+  p2.drawTxt('presente instrumento, lançando mão desde já de qualquer alegação de caso fortuito ou', 70, 85, 8.5);
+  p2.drawTxt('força maior como excludentes da responsabilidade e ou obrigação de indenizar aqui', 70, 99, 8.5);
+  p2.drawTxt('assumida.', 70, 113, 8.5);
+
+  // Cláusula 5
+  p2.drawTxt('5. Em caso de turbação ou esbulho da posse do bem por atos de terceiros, a', 70, 180, 8.5);
+  p2.drawTxt('COMODATÁRIA deverá tomar as providências cabíveis a fim de cessar tais atos, bem', 70, 194, 8.5);
+  p2.drawTxt('como comunicar imediatamente tais fatos à COMODANTE.', 70, 208, 8.5);
+
+  // Cláusula 6
+  p2.drawTxt('6. Qualquer tolerância ou concessão das partes quanto ao cumprimento do disposto', 70, 275, 8.5);
+  p2.drawTxt('neste contrato constituir-se-á ato de mera liberalidade, não podendo ser considerado', 70, 289, 8.5);
+  p2.drawTxt('novação.', 70, 303, 8.5);
+
+  // Cláusula 7
+  p2.drawTxt('7. As Partes declaram que, direta ou indiretamente, atuam em seus negócios pautadas', 70, 370, 8.5);
+  p2.drawTxt('no profissionalismo e na ética, em conformidade com as leis brasileiras, sempre', 70, 384, 8.5);
+  p2.drawTxt('respeitando o pactuado no presente Contrato e sem qualquer violação às previsões da', 70, 398, 8.5);
+  p2.drawTxt('presente cláusula.', 70, 412, 8.5);
+
+  // Cláusula 7.1
+  p2.drawTxt('7.1 As Partes garantem, para todos os efeitos, que:', 70, 480, 8.5);
+
+  p2.drawTxt('a) Cumprem todas as leis e normas relacionadas à anticorrupção, lavagem de', 70, 535, 8.5);
+  p2.drawTxt('dinheiro, antissuborno, antitruste e conflito de interesses, incluindo principalmente,', 70, 549, 8.5);
+  p2.drawTxt('mas não se limitando à Lei Brasileira Anticorrupção (Lei 12.846/2013), Decreto', 70, 563, 8.5);
+  p2.drawTxt('Brasileiro Anticorrupção (Decreto n° 8.420/2015), Lei Brasileira de Licitações (Lei n°', 70, 577, 8.5);
+  p2.drawTxt('8.666/1993) e qualquer legislação relativa a Lavagem de Dinheiro;', 70, 591, 8.5);
+
+  p2.drawTxt('b) Adotam políticas de prevenção e combate à corrupção, à lavagem de dinheiro e ao', 70, 650, 8.5);
+  p2.drawTxt('financiamento ao terrorismo, elaboradas em conformidade com as legislações aplicáveis,', 70, 664, 8.5);
+  p2.drawTxt('bem como desenvolvem suas atividades em estrita observância a estas políticas, não', 70, 678, 8.5);
+  p2.drawTxt('adotando qualquer prática vedada pela legislação aplicável ou utilizando em suas', 70, 692, 8.5);
+  p2.drawTxt('atividades quaisquer valores, bens ou direitos provenientes de infração penal;', 70, 706, 8.5);
+
+  // ===================== PÁGINA 3 =====================
+  const page3 = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const p3 = createPageHelpers(page3);
+
+  p3.drawTxt('c) Não utilizam trabalho ilegal, se comprometendo a não utilizar práticas de trabalho', 70, 85, 8.5);
+  p3.drawTxt('análogo ao escravo ou mão de obra infantil, salvo esta última na condição de aprendiz,', 70, 99, 8.5);
+  p3.drawTxt('observadas as disposições constantes da Consolidação das Leis do Trabalho - CLT;', 70, 113, 8.5);
+
+  p3.drawTxt('d) Não empregam menores até 18 (dezoito) anos, inclusive menor aprendiz, em locais', 70, 180, 8.5);
+  p3.drawTxt('prejudiciais à sua formação, ao seu desenvolvimento físico, psíquico, moral e social,', 70, 194, 8.5);
+  p3.drawTxt('bem como em locais e serviços perigosos ou insalubres, em horário noturno e, ainda,', 70, 208, 8.5);
+  p3.drawTxt('em horários que não permitam a frequência destes empregados à escola;', 70, 222, 8.5);
+
+  p3.drawTxt('e) Cumprem a legislação trabalhista, quanto às horas de trabalho e aos direitos dos', 70, 295, 8.5);
+  p3.drawTxt('empregados e também não dificultam a participação dos empregados em sindicatos;', 70, 309, 8.5);
+
+  p3.drawTxt('f) Não utilizam práticas de discriminação negativa e limitativas ao acesso à relação', 70, 375, 8.5);
+  p3.drawTxt('de emprego ou a sua manutenção, incluindo, mas sem limitação, práticas de', 70, 389, 8.5);
+  p3.drawTxt('discriminação e limitação em razão de sexo, origem, raça, cor, condição física, religião,', 70, 403, 8.5);
+  p3.drawTxt('estado civil, idade, situação familiar ou estado gravídico; e', 70, 417, 8.5);
+
+  p3.drawTxt('g) Executam suas atividades em observância à legislação vigente no que tange à', 70, 490, 8.5);
+  p3.drawTxt('proteção ao meio ambiente, comprometendo-se a prevenir e erradicar práticas danosas', 70, 504, 8.5);
+  p3.drawTxt('ao meio ambiente.', 70, 518, 8.5);
+
+  p3.drawTxt('8. As Partes declaram, garantem e aceitam que, com relação a este Contrato e sua', 70, 560, 8.5);
+  p3.drawTxt('atividade:', 70, 574, 8.5);
+
+  p3.drawTxt('a) Não houve e não haverá nenhum tipo de solicitação, cobrança, obtenção ou', 70, 630, 8.5);
+  p3.drawTxt('exigência, para si e para outrem, de vantagem indevida ou promessa de vantagem', 70, 644, 8.5);
+  p3.drawTxt('indevida, nem qualquer oferta ou promessa de pagamento de valor pecuniário ou outros', 70, 658, 8.5);
+  p3.drawTxt('benefícios, como presentes, favores, promessas ou vantagens, direta ou indiretamente,', 70, 672, 8.5);
+  p3.drawTxt('com pretexto de condicionar em ato praticado por qualquer funcionário uma da outra', 70, 686, 8.5);
+  p3.drawTxt('ou ainda a agentes públicos, políticos e/ou privados, partidos políticos e candidatos, ou', 70, 700, 8.5);
+  p3.drawTxt('ainda qualquer pessoa que atue em nome de uma organização pública nacional ou', 70, 714, 8.5);
+  p3.drawTxt('internacional, bem como seus familiares ou amigos;', 70, 728, 8.5);
+
+  p3.drawTxt('b) Não doam fundos, financiam ou de qualquer forma subsidiam atos ou práticas', 70, 770, 8.5);
+  p3.drawTxt('ilegais.', 70, 784, 8.5);
+
+  // ===================== PÁGINA 4 =====================
+  const page4 = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const p4 = createPageHelpers(page4);
+
+  p4.drawTxt('8.1. As Partes se comprometem em combater toda e qualquer atividade que seja contra', 70, 115, 8.5);
+  p4.drawTxt('livre concorrência, especialmente, mas não se limitando às iniciativas indutoras à', 70, 129, 8.5);
+  p4.drawTxt('formação de cartel.', 70, 143, 8.5);
+
+  p4.drawTxt('8.2. As Partes ficarão sujeitas a auditorias e visitas, bem como ao envio de documentos', 70, 215, 8.5);
+  p4.drawTxt('e evidências para verificação do cumprimento das práticas estabelecidas nesta cláusula,', 70, 229, 8.5);
+  p4.drawTxt('mediante solicitação prévia de 20 (dias), sempre precedida da assinatura de um Termo', 70, 243, 8.5);
+  p4.drawTxt('de Confidencialidade (NDA – Non Disclosure Agreement).', 70, 257, 8.5);
+
+  p4.drawTxt('8.3. Caso a Parte auditora, entenda pela necessidade de contratação de uma empresa', 70, 330, 8.5);
+  p4.drawTxt('especializada para realização da auditoria descrita no caput desta cláusula, todos os', 70, 344, 8.5);
+  p4.drawTxt('encargos e verbas devidas por essa contratação serão de responsabilidade da Parte que', 70, 358, 8.5);
+  p4.drawTxt('deseja realizar a auditoria.', 70, 372, 8.5);
+
+  p4.drawTxt('8.4. O não cumprimento ou violação por uma das Partes de quaisquer práticas', 70, 445, 8.5);
+  p4.drawTxt('estabelecidas neste título poderá ensejar a imediata rescisão deste contrato pela outra', 70, 459, 8.5);
+  p4.drawTxt('Parte.', 70, 473, 8.5);
+
+  p4.drawTxt('8.5. Em conformidade com o objeto previsto neste Contrato, as Partes poderão ter acesso', 70, 535, 8.5);
+  p4.drawTxt('a dados enviados que identifiquem ou permitam a identificação de indivíduos (“Dados', 70, 549, 8.5);
+  p4.drawTxt('Pessoais”).', 70, 563, 8.5);
+
+  p4.drawTxt('8.6. As Partes se comprometem, por meio de suas assinaturas apostas ao presente', 70, 625, 8.5);
+  p4.drawTxt('instrumento, a cumprir com a legislação brasileira referente à proteção de dados', 70, 639, 8.5);
+  p4.drawTxt('pessoais cadastrados junto aos seus sistemas.', 70, 653, 8.5);
+
+  p4.drawTxt('8.7. As Partes concordam que a execução do presente Contrato será guiada pelo', 70, 715, 8.5);
+  p4.drawTxt('princípio de Privacy by Design, ou seja, promovendo a privacidade e a conformidade com', 70, 729, 8.5);
+  p4.drawTxt('a proteção de dados desde o desenho do serviço e ao longo de sua execução, e pelas', 70, 743, 8.5);
+  p4.drawTxt('regras jurídicas de compliance aplicáveis.', 70, 757, 8.5);
+
+  // ===================== PÁGINA 5 =====================
+  const page5 = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const p5 = createPageHelpers(page5);
+
+  p5.drawTxt('8.8. O acesso, utilização, coleta, produção, recepção, classificação, acesso, reprodução,', 70, 85, 8.5);
+  p5.drawTxt('transmissão, distribuição, processamento, arquivamento, armazenamento, eliminação,', 70, 99, 8.5);
+  p5.drawTxt('avaliação ou controle da informação, modificação, comunicação, transferência, difusão', 70, 113, 8.5);
+  p5.drawTxt('ou extração e o compartilhamento por qualquer das Partes dos Dados Pessoais que lhe', 70, 127, 8.5);
+  p5.drawTxt('forem enviados pela outra Parte (“Tratamento de Dados Pessoais”) será autorizado e', 70, 141, 8.5);
+  p5.drawTxt('limitado ao estritamente necessário para a execução da prestação dos Serviços. Fica', 70, 155, 8.5);
+  p5.drawTxt('vedada a utilização dos Dados Pessoais para quaisquer outras finalidades.', 70, 169, 8.5);
+
+  p5.drawTxt('8.9. As Partes somente poderão realizar o Tratamento de Dados Pessoais recebidos por', 70, 255, 8.5);
+  p5.drawTxt('força deste Contrato durante o período de sua vigência com a finalidade estrita de', 70, 269, 8.5);
+  p5.drawTxt('cumprir as obrigações do presente Contrato.', 70, 283, 8.5);
+
+  p5.drawTxt('8.10. Fica vedado às Partes transferir, no todo ou em parte, os Dados Pessoais que lhe', 70, 330, 8.5);
+  p5.drawTxt('forem enviados pela outra Parte para quaisquer terceiros não relacionados com a', 70, 344, 8.5);
+  p5.drawTxt('realização das Atividades, mesmo que de forma agregada e/ou anônima.', 70, 358, 8.5);
+
+  p5.drawTxt('8.11. Caso qualquer das Partes seja obrigada a transferir ou divulgar qualquer Dado', 70, 425, 8.5);
+  p5.drawTxt('Pessoal em razão de ordem administrativa ou judicial de qualquer natureza, deverá', 70, 439, 8.5);
+  p5.drawTxt('informar à outra Parte em até 24 (vinte e quatro) horas, a fim de que este possa tomar', 70, 453, 8.5);
+  p5.drawTxt('as medidas judiciais que entender necessárias. Além disso, as Partes comprometem-se', 70, 467, 8.5);
+  p5.drawTxt('a cooperar uma com a outra a fim de limitar para limitar a extensão e o âmbito de tal', 70, 481, 8.5);
+  p5.drawTxt('transferência ou divulgação de dados.', 70, 495, 8.5);
+
+  p5.drawTxt('8.12. As Partes deverão ainda promover a exclusão definitiva de quaisquer Dados', 70, 575, 8.5);
+  p5.drawTxt('Pessoais que lhe foram transmitidos por força deste contrato por solicitação dos Clientes', 70, 589, 8.5);
+  p5.drawTxt('Finais ou da outra Parte.', 70, 603, 8.5);
+
+  p5.drawTxt('8.13. As Partes se comprometem a assegurar a segurança dos Dados Pessoais, sua', 70, 670, 8.5);
+  p5.drawTxt('privacidade e a adequada gestão dos Dados Pessoais recebidos e utilizados para a', 70, 684, 8.5);
+  p5.drawTxt('prestação dos Serviços, valendo-se de técnicas de segurança como', 70, 698, 8.5);
+  p5.drawTxt('criptografia, hardening, além de monitoramento e testes de segurança frequentes,', 70, 712, 8.5);
+  p5.drawTxt('dentre outros métodos de proteção condizentes com as melhores práticas do setor para', 70, 726, 8.5);
+  p5.drawTxt('a proteção de dados.', 70, 740, 8.5);
+
+  p5.drawTxt('8.14. As Partes obrigam-se a notificar uma à outra, em até 24 (vinte e quatro) horas,', 70, 810, 8.5);
+  p5.drawTxt('acerca de qualquer vazamento ou comprometimento de suas bases de dados', 70, 824, 8.5);
+
+  // ===================== PÁGINA 6 =====================
+  const page6 = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const p6 = createPageHelpers(page6);
+
+  p6.drawTxt('relacionadas com o presente Contrato, bem como acerca de qualquer violação da', 70, 85, 8.5);
+  p6.drawTxt('legislação de privacidade e de proteção de dados pessoais que tiver ciência com relação', 70, 99, 8.5);
+  p6.drawTxt('aos dados em sua custódia, inclusive violação acidental ou culposa.', 70, 113, 8.5);
+
+  p6.drawTxt('8.15. Caso qualquer das Partes sofram qualquer dano ou prejuízos em decorrência do', 70, 180, 8.5);
+  p6.drawTxt('descumprimento comprovado das cláusulas de proteção de dados pessoais deste', 70, 194, 8.5);
+  p6.drawTxt('Contrato ou do descumprimento legal de obrigações de proteção de dados, ocasionado', 70, 208, 8.5);
+  p6.drawTxt('por ação ou omissão da outra Parte, ficará a Parte Infratora obrigada a ressarcir', 70, 222, 8.5);
+  p6.drawTxt('integralmente quaisquer danos, prejuízos e lucros cessantes à Parte Inocente, como', 70, 236, 8.5);
+  p6.drawTxt('como quaisquer custas judiciais, administrativas e honorários advocatícios.', 70, 250, 8.5);
+
+  p6.drawTxt('8.16. Na hipótese de qualquer questionamento por parte de autoridades públicas ou', 70, 335, 8.5);
+  p6.drawTxt('ação judicial relacionada à proteção de dados, as Partes obrigam-se a informar uma à', 70, 349, 8.5);
+  p6.drawTxt('outra no prazo de 24 (vinte e quatro horas) tão logo tenha ciência, bem como obrigam-', 70, 363, 8.5);
+  p6.drawTxt('se a assumir por sua própria conta a defesa relacionada a esses questionamentos,', 70, 377, 8.5);
+  p6.drawTxt('indenizando a Parte Inocente com relação a quaisquer prejuízos, inclusive com relação', 70, 391, 8.5);
+  p6.drawTxt('a custas judiciais, administrativas e honorários advocatícios.', 70, 405, 8.5);
+
+  p6.drawTxt('9. Admite-se a rescisão do presente contrato, sem ônus e a qualquer tempo, por parte', 70, 490, 8.5);
+  p6.drawTxt('da COMODANTE e por parte da COMODATÁRIA mediante aviso prévio de 03 (tres) dias.', 70, 504, 8.5);
+
+  p6.drawTxt('10. O não cumprimento de qualquer das cláusulas deste contrato implicará na sua', 70, 570, 8.5);
+  p6.drawTxt('imediata rescisão, perfeitamente reconhecida pelos contratantes.', 70, 584, 8.5);
+
+  p6.drawTxt('11. Os contratantes elegem o foro da Comarca de Campinas do Estado de São Paulo', 70, 650, 8.5);
+  p6.drawTxt('para dirimir dúvidas ou questões oriundas do presente contrato.', 70, 664, 8.5);
+
+  p6.drawTxt('E assim, por estarem justos e contratados, assinam o presente instrumento em 02', 70, 725, 8.5);
+  p6.drawTxt('(duas) vias de igual teor, por um só fim, na presença de testemunhas a tudo presentes.', 70, 739, 8.5);
+
+  // Data
+  p6.drawTxt('Jundiaí,', 70, 775, 8.5);
+  p6.drawHLine(108, 775, 133, 0.6);
+  p6.drawTxt('de', 135, 775, 8.5);
+  p6.drawHLine(145, 775, 245, 0.6);
+  p6.drawTxt('de', 247, 775, 8.5);
+  p6.drawHLine(260, 775, 300, 0.6);
+  p6.drawTxt('.', 302, 775, 8.5);
+
+  // Pontilhado inferior
+  p6.drawTxt('.................................................................................................', 140, 830, 8.5);
+
+  // ===================== PÁGINA 7 =====================
+  const page7 = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const p7 = createPageHelpers(page7);
+
+  // Cabeçalho Assinaturas
+  p7.drawTxt('CMD GW COMERCIO DE VEÍCULOS AUTOMOTORES LTDA', 120, 85, 9.5, true);
+  p7.drawTxt('Comodante', 260, 125, 8.5);
+
+  p7.drawTxt('.................................................................................................', 140, 180, 8.5);
+  p7.drawHLine(180, 225, 415, 0.8);
+  p7.drawTxt('Comodatária', 256, 250, 8.5);
+
+  // Testemunhas
+  p7.drawTxt('Testemunhas:', 70, 300, 8.5);
+
+  p7.drawTxt('..........................................................', 70, 360, 8.5);
+  p7.drawTxt('Nome', 70, 385, 8.5);
+  p7.drawTxt('RG', 70, 420, 8.5);
+
+  p7.drawTxt('..........................................................', 70, 485, 8.5);
+  p7.drawTxt('Nome', 70, 510, 8.5);
+  p7.drawTxt('RG', 70, 545, 8.5);
+
+  return await pdfDoc.save();
+}
+
+// 8. AUTORIZAÇÃO DE PAGAMENTO
+export async function generateMasterAutorizacaoPagamentoPdf(): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const drawTxt = (text: string, x: number, yFromTop: number, size = 9.5, isBold = false, color = darkText) =>
+    drawTextHelper(page, fontRegular, fontBold, text, x, yFromTop, size, isBold, color);
+
+  const drawHLine = (x1: number, yFromTop: number, x2: number, width = 0.6, color = lineColor) =>
+    drawHLineHelper(page, x1, yFromTop, x2, width, color);
+
+  // --- Title Box ---
+  const titleText = 'AUTORIZAÇÃO DE PAGAMENTO';
+  const titleWidth = fontBold.widthOfTextAtSize(titleText, 11);
+  const boxPaddingX = 14;
+  const boxPaddingY = 5;
+  const boxWidth = titleWidth + boxPaddingX * 2;
+  const boxHeight = 22;
+  const boxX = (PAGE_WIDTH - boxWidth) / 2;
+  const boxYFromTop = 85;
+
+  // Draw rectangle box for Title
+  page.drawRectangle({
+    x: boxX,
+    y: PAGE_HEIGHT - boxYFromTop - boxHeight,
+    width: boxWidth,
+    height: boxHeight,
+    borderWidth: 0.8,
+    borderColor: lineColor,
+    color: rgb(1, 1, 1),
+  });
+
+  // Draw Title text inside box
+  drawTxt(titleText, boxX + boxPaddingX, boxYFromTop + 15, 11, true);
+
+  // --- Paragraph Lines ---
+  const leftX = 75;
+
+  // Line 1 (y: 160)
+  drawTxt('Eu,', leftX, 160, 9.5);
+  drawHLine(92, 160, 436, 0.6);
+  drawTxt(', portador (a) da', 438, 160, 9.5);
+
+  // Line 2 (y: 185)
+  drawTxt('Cédula de Identidade nº.', leftX, 185, 9.5);
+  drawHLine(194, 185, 294, 0.6);
+  drawTxt(', inscrito (a) no Cadastro das Pessoas', 296, 185, 9.5);
+
+  // Line 3 (y: 210)
+  drawTxt('Físicas do Ministério da Fazenda sob o nº.', leftX, 210, 9.5);
+  drawHLine(272, 210, 396, 0.6);
+  drawTxt(', na qualidade de', 398, 210, 9.5);
+
+  // Line 4 (y: 235)
+  drawTxt('vendedor(a) do veículo baixo descrito, ', leftX, 235, 9.5);
+  const w1 = fontRegular.widthOfTextAtSize('vendedor(a) do veículo baixo descrito, ', 9.5);
+  drawTxt('Solicito e Autorizo', leftX + w1, 235, 9.5, true);
+  const w2 = fontBold.widthOfTextAtSize('Solicito e Autorizo', 9.5);
+  drawTxt(' que o valor acertado com a', leftX + w1 + w2, 235, 9.5);
+
+  // Line 5 (y: 260)
+  drawTxt('venda de meu veículo seja efetuado diretamente na conta corrente de titularidade da', leftX, 260, 9.5);
+
+  // Line 6 (y: 285)
+  drawTxt('empresa, inscrita no CNPJ/MF sob o n.', leftX, 285, 9.5);
+  drawHLine(260, 285, 478, 0.6);
+  drawTxt(',', 480, 285, 9.5);
+
+  // --- Date Line (y: 338) ---
+  drawTxt('São Paulo,', 165, 338, 9.5);
+  drawHLine(222, 338, 246, 0.6);
+  drawTxt('de', 250, 338, 9.5);
+  drawHLine(266, 338, 336, 0.6);
+  drawTxt('de', 340, 338, 9.5);
+  drawHLine(356, 338, 406, 0.6);
+  drawTxt('.', 408, 338, 9.5);
+
+  // --- Signature Line (y: 390) ---
+  drawHLine(75, 390, 520, 1.2, darkText);
+  drawTxt('Nome do Vendedor:', 235, 408, 9.5);
+
+  return await pdfDoc.save();
+}
+
 /**
  * Overlay field values onto the master PDF buffer with exact coordinate transformation
  */
@@ -965,12 +1444,16 @@ export async function renderDocumentPdf(
     
     // Check aliases if exact key is not directly provided
     if (rawVal === undefined || rawVal === null || rawVal === '') {
-      if (field.field_key === 'declarante_nome' || field.field_key === 'cliente_nome' || field.field_key === 'proprietario_nome') {
-        rawVal = safeValues.declarante_nome || safeValues.cliente_nome || safeValues.proprietario_nome || safeValues.nome_completo || safeValues.nome || '';
-      } else if (field.field_key === 'declarante_cpf' || field.field_key === 'cliente_cpf' || field.field_key === 'proprietario_cpf') {
-        rawVal = safeValues.declarante_cpf || safeValues.cliente_cpf || safeValues.proprietario_cpf || safeValues.cpf || safeValues.cpf_cnpj || '';
+      if (field.field_key === 'declarante_nome' || field.field_key === 'cliente_nome' || field.field_key === 'proprietario_nome' || field.field_key === 'vendedor_nome') {
+        rawVal = safeValues.vendedor_nome || safeValues.declarante_nome || safeValues.cliente_nome || safeValues.proprietario_nome || safeValues.nome_completo || safeValues.nome || '';
+      } else if (field.field_key === 'declarante_cpf' || field.field_key === 'cliente_cpf' || field.field_key === 'proprietario_cpf' || field.field_key === 'vendedor_cpf') {
+        rawVal = safeValues.vendedor_cpf || safeValues.declarante_cpf || safeValues.cliente_cpf || safeValues.proprietario_cpf || safeValues.cpf || safeValues.cpf_cnpj || '';
+      } else if (field.field_key === 'declarante_rg' || field.field_key === 'cliente_rg' || field.field_key === 'vendedor_rg') {
+        rawVal = safeValues.vendedor_rg || safeValues.declarante_rg || safeValues.cliente_rg || safeValues.rg || '';
       } else if (field.field_key === 'comprador_nome' || field.field_key === 'empresa_nome') {
         rawVal = safeValues.comprador_nome || safeValues.empresa_nome || safeValues.razao_social || '';
+      } else if (field.field_key === 'empresa_cnpj') {
+        rawVal = safeValues.empresa_cnpj || safeValues.cnpj || safeValues.comprador_cnpj || '';
       }
     }
 

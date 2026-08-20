@@ -8,6 +8,7 @@ import {
   saveTemplate,
   deleteTemplate,
   BUILT_IN_TEMPLATE_RESPONSABILIDADE,
+  ALL_BUILT_IN_TEMPLATES,
   loadDocumentHistory,
   saveDocumentToHistory,
   deleteDocumentFromHistory,
@@ -121,9 +122,12 @@ export default function App() {
   };
 
   const handleResetDefaultTemplate = () => {
-    saveTemplate(BUILT_IN_TEMPLATE_RESPONSABILIDADE);
+    const defaultTemplate =
+      ALL_BUILT_IN_TEMPLATES.find((t) => t.id === activeTemplate.id) ||
+      BUILT_IN_TEMPLATE_RESPONSABILIDADE;
+    saveTemplate({ ...defaultTemplate });
     setTemplates(loadAllTemplates());
-    setActiveTemplate(BUILT_IN_TEMPLATE_RESPONSABILIDADE);
+    setActiveTemplate({ ...defaultTemplate });
   };
 
   const handleSaveToHistory = (

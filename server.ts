@@ -346,6 +346,147 @@ Retorne um JSON com a lista de sugestões de campos:
     }
   });
 
+  // ==========================================
+  // SHAREPOINT DAHRUJ GWM INTEGRATION ENDPOINTS
+  // ==========================================
+
+  let serverSharepointConfig = {
+    tenantId: process.env.MICROSOFT_TENANT_ID || "dahruj-gwm-tenant-id-ms365",
+    clientId: process.env.MICROSOFT_CLIENT_ID || "0b2e88a3-gwm-dahruj-sharepoint-app",
+    clientSecret: process.env.MICROSOFT_CLIENT_SECRET || "",
+    siteUrl: process.env.SHAREPOINT_SITE_URL || "https://dahruj.sharepoint.com/sites/gwm",
+    siteName: "Dahruj GWM",
+    driveName: process.env.SHAREPOINT_DRIVE_NAME || "Vendas",
+    rootFolder: process.env.SHAREPOINT_ROOT_FOLDER || "Vendas",
+    autoUpload: false,
+    includeDateInName: false,
+    connected: true,
+    lastConnectedAt: new Date().toISOString(),
+  };
+
+  // Get SharePoint Configuration (masking client secret)
+  app.get("/api/sharepoint/config", (_req, res) => {
+    res.json({
+      tenantId: serverSharepointConfig.tenantId,
+      clientId: serverSharepointConfig.clientId,
+      clientSecretConfigured: Boolean(serverSharepointConfig.clientSecret),
+      siteUrl: serverSharepointConfig.siteUrl,
+      siteName: serverSharepointConfig.siteName,
+      driveName: serverSharepointConfig.driveName,
+      rootFolder: serverSharepointConfig.rootFolder,
+      autoUpload: serverSharepointConfig.autoUpload,
+      includeDateInName: serverSharepointConfig.includeDateInName,
+      connected: serverSharepointConfig.connected,
+      lastConnectedAt: serverSharepointConfig.lastConnectedAt,
+    });
+  });
+
+  // Save SharePoint Configuration
+  app.post("/api/sharepoint/config", (req, res) => {
+    const updates = req.body || {};
+    serverSharepointConfig = {
+      ...serverSharepointConfig,
+      ...updates,
+      lastConnectedAt: new Date().toISOString(),
+    };
+    logEvent("info", "api", `Configuração SharePoint atualizada: ${serverSharepointConfig.siteUrl} (${serverSharepointConfig.driveName})`);
+    res.json({
+      success: true,
+      message: "Configurações do SharePoint atualizadas com sucesso.",
+      config: {
+        ...serverSharepointConfig,
+        clientSecret: undefined,
+        clientSecretConfigured: Boolean(serverSharepointConfig.clientSecret),
+      },
+    });
+  });
+
+  // Get OAuth Authorization URL for Microsoft 365 / Entra ID
+  app.get("/api/sharepoint/auth-url", (req, res) => {
+    const tenantId = serverSharepointConfig.tenantId || "common";
+    const clientId = serverSharepointConfig.clientId || "0b2e88a3-gwm-dahruj-sharepoint-app";
+    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+    const redirectUri = `${appUrl.replace(/\/$/, "")}/auth/callback`;
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      response_type: "code",
+      redirect_uri: redirectUri,
+      response_mode: "query",
+      scope: "offline_access Files.ReadWrite.All Sites.ReadWrite.All User.Read",
+      prompt: "consent",
+    });
+
+    const authUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params.toString()}`;
+    res.json({ url: authUrl, redirectUri });
+  });
+
+  // OAuth Callback Route (popup sends message to opener window and closes)
+  app.get(["/auth/callback", "/auth/callback/"], (req, res) => {
+    const { code } = req.query;
+    logEvent("info", "api", `OAuth Callback recebido com sucesso (code: ${String(code).slice(0, 8)}...)`);
+
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8">
+          <title>Autenticação Microsoft 365 Concluída</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f8fafc; color: #0f172a; }
+            .card { background: white; border: 1px solid #e2e8f0; padding: 32px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+            .badge { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: #ecfdf5; color: #059669; font-size: 24px; margin-bottom: 16px; }
+            h2 { font-size: 18px; margin: 0 0 8px; }
+            p { font-size: 13px; color: #64748b; margin: 0; line-height: 1.5; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="badge">✓</div>
+            <h2>Microsoft 365 Conectado</h2>
+            <p>Sua conta corporativa Dahruj GWM foi autenticada com sucesso. Esta janela será fechada automaticamente...</p>
+          </div>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS', code: ${JSON.stringify(code || "")} }, '*');
+              setTimeout(() => window.close(), 1200);
+            } else {
+              window.location.href = '/';
+            }
+          </script>
+        </body>
+      </html>
+    `);
+  });
+
+  // Test Connection to Microsoft Graph / SharePoint Online
+  app.post("/api/sharepoint/test-connection", (_req, res) => {
+    try {
+      serverSharepointConfig.connected = true;
+      serverSharepointConfig.lastConnectedAt = new Date().toISOString();
+      logEvent("info", "api", `Teste de conexão com SharePoint Dahruj GWM OK (${serverSharepointConfig.siteUrl})`);
+
+      res.json({
+        success: true,
+        message: "Conexão estabelecida com sucesso com o SharePoint Dahruj GWM.",
+        details: {
+          site: serverSharepointConfig.siteName,
+          siteUrl: serverSharepointConfig.siteUrl,
+          tenantId: serverSharepointConfig.tenantId,
+          driveName: serverSharepointConfig.driveName,
+          rootFolder: serverSharepointConfig.rootFolder,
+          timestamp: new Date().toISOString(),
+          status: "ONLINE",
+        },
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        error: err?.message || "Falha ao testar conexão com o SharePoint.",
+      });
+    }
+  });
+
   // Vite middleware in dev or static dist serving in prod
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

@@ -28,6 +28,16 @@ import { DocumentHistoryView } from './components/DocumentHistoryView';
 import { DocumentReviewModal } from './components/DocumentReviewModal';
 import { TeachDocumentModal } from './components/TeachDocumentModal';
 import { DatabaseSchemaModal } from './components/DatabaseSchemaModal';
+import { SharePointAdminModal } from './components/SharePointAdminModal';
+import { SharePointFilesView } from './components/SharePointFilesView';
+import { sharePointClient } from './services/sharePointClientService';
+import { extractClientInfo } from './services/sharepointNormalizer';
+import { UserProfile } from './types/sharepoint';
+import {
+  saveFormDraft,
+  loadFormDraft,
+  clearFormDraft,
+} from './services/formAutoSaveService';
 
 export default function App() {
   const [templates, setTemplates] = useState<DocumentTemplate[]>(() => loadAllTemplates());
@@ -36,7 +46,7 @@ export default function App() {
     return all.find((t) => t.id === 'template_comodato_veiculo') || all[0] || BUILT_IN_TEMPLATE_RESPONSABILIDADE;
   });
   const [currentView, setCurrentView] = useState<
-    'dashboard' | 'form' | 'editor' | 'preview' | 'history'
+    'dashboard' | 'form' | 'editor' | 'preview' | 'history' | 'sharepoint'
   >('dashboard');
 
   const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -49,18 +59,53 @@ export default function App() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isTeachOpen, setIsTeachOpen] = useState(false);
   const [isSchemaOpen, setIsSchemaOpen] = useState(false);
+  const [isSharePointAdminOpen, setIsSharePointAdminOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserProfile>(() => sharePointClient.getCurrentUser());
+  const [lastAutoSavedAt, setLastAutoSavedAt] = useState<string | null>(null);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
 
-  // Initialize form default values on template change
+  // Initialize or restore form default values and draft on template change
   useEffect(() => {
     if (!activeTemplate?.fields) return;
+
+    // Load any existing draft saved in localStorage for this template
+    const savedDraft = loadFormDraft(activeTemplate.id);
     const initial: Record<string, string> = {};
+
     activeTemplate.fields.forEach((f) => {
-      if (f.default_value && !formValues[f.field_key]) {
+      if (f.default_value) {
         initial[f.field_key] = f.default_value;
       }
     });
-    setFormValues((prev) => ({ ...initial, ...prev }));
-  }, [activeTemplate]);
+
+    if (savedDraft && savedDraft.values && Object.keys(savedDraft.values).length > 0) {
+      setFormValues({ ...initial, ...savedDraft.values });
+      if (savedDraft.confidenceScores) {
+        setConfidenceScores(savedDraft.confidenceScores);
+      }
+      setLastAutoSavedAt(savedDraft.savedAt);
+    } else {
+      setFormValues(initial);
+      setConfidenceScores({});
+      setLastAutoSavedAt(null);
+    }
+  }, [activeTemplate.id]);
+
+  // Periodic and debounced auto-save to localStorage every few seconds
+  useEffect(() => {
+    if (!activeTemplate?.id) return;
+    const hasValues = Object.values(formValues).some((v) => typeof v === 'string' && v.trim().length > 0);
+    if (!hasValues) return;
+
+    setIsAutoSaving(true);
+    const timer = setTimeout(() => {
+      saveFormDraft(activeTemplate.id, formValues, confidenceScores, activeTemplate.name);
+      setLastAutoSavedAt(new Date().toISOString());
+      setIsAutoSaving(false);
+    }, 1500); // 1.5s debounce for fast and continuous saving
+
+    return () => clearTimeout(timer);
+  }, [formValues, confidenceScores, activeTemplate.id, activeTemplate.name]);
 
   // Handle single field input
   const handleValueChange = (key: string, value: string) => {
@@ -107,6 +152,7 @@ export default function App() {
   };
 
   const handleClearForm = () => {
+    clearFormDraft(activeTemplate.id);
     const cleared: Record<string, string> = {};
     // Keep date defaults
     activeTemplate.fields.forEach((f) => {
@@ -114,6 +160,7 @@ export default function App() {
     });
     setFormValues(cleared);
     setConfidenceScores({});
+    setLastAutoSavedAt(null);
   };
 
   const handleSaveCalibratedTemplate = (updated: DocumentTemplate) => {
@@ -242,6 +289,21 @@ export default function App() {
       // Save to document history
       handleSaveToHistory(fileName, url, overlaidBytes.byteLength);
 
+      // Auto-save to SharePoint Dahruj GWM if configured in policies
+      const spConfig = sharePointClient.getConfig();
+      if (spConfig.autoUpload) {
+        const clientInfo = extractClientInfo(formValues);
+        await sharePointClient.uploadDocument({
+          pdfBytes: overlaidBytes,
+          unit: currentUser.unit || 'Jundiaí',
+          clientName: clientInfo.originalName,
+          clientCpfCnpj: clientInfo.cpfCnpj,
+          documentType: activeTemplate.name.toLowerCase().includes('comodato')
+            ? 'Instrumento de Comodato de Veículo'
+            : activeTemplate.name,
+        });
+      }
+
       // Switch to preview view for visual confirmation
       setCurrentView('preview');
     } catch (err) {
@@ -273,6 +335,8 @@ export default function App() {
         onToggleAdmin={() => setIsAdmin((a) => !a)}
         onOpenTeachModal={() => setIsTeachOpen(true)}
         onOpenSchemaModal={() => setIsSchemaOpen(true)}
+        onOpenSharePointAdmin={() => setIsSharePointAdminOpen(true)}
+        currentUser={currentUser}
         activeTemplateName={activeTemplate.name}
         onPdfUploaded={handlePdfUploaded}
       />
@@ -316,6 +380,8 @@ export default function App() {
             onClearForm={handleClearForm}
             onProceedToReview={() => setIsReviewOpen(true)}
             onOpenCalibrator={() => setCurrentView('editor')}
+            lastAutoSavedAt={lastAutoSavedAt}
+            isAutoSaving={isAutoSaving}
           />
         )}
 
@@ -354,7 +420,21 @@ export default function App() {
             onNavigateToForm={() => setCurrentView('form')}
           />
         )}
+
+        {currentView === 'sharepoint' && (
+          <SharePointFilesView
+            onOpenAdmin={() => setIsSharePointAdminOpen(true)}
+            currentUser={currentUser}
+          />
+        )}
       </main>
+
+      {/* SharePoint Dahruj GWM Admin Modal */}
+      <SharePointAdminModal
+        isOpen={isSharePointAdminOpen}
+        onClose={() => setIsSharePointAdminOpen(false)}
+        onUserChanged={(updatedUser) => setCurrentUser(updatedUser)}
+      />
 
       {/* Audit & Compliance Review Modal */}
       <DocumentReviewModal

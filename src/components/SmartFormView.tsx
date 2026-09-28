@@ -23,7 +23,9 @@ import {
   FileUp,
   Info,
   Sliders,
-  Tag
+  Tag,
+  Check,
+  Loader2
 } from 'lucide-react';
 import { extractDocumentData } from '../services/aiExtractionService';
 
@@ -39,6 +41,8 @@ interface SmartFormViewProps {
   onClearForm: () => void;
   onProceedToReview: () => void;
   onOpenCalibrator?: () => void;
+  lastAutoSavedAt?: string | null;
+  isAutoSaving?: boolean;
 }
 
 const GROUP_METADATA: Record<
@@ -107,6 +111,8 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
   onClearForm,
   onProceedToReview,
   onOpenCalibrator,
+  lastAutoSavedAt,
+  isAutoSaving,
 }) => {
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiRawText, setAiRawText] = useState('');
@@ -403,6 +409,25 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* Autosave status indicator */}
+            {isAutoSaving ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                <span className="hidden sm:inline">Salvando rascunho...</span>
+              </div>
+            ) : lastAutoSavedAt ? (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-medium"
+                title={`Progresso salvo no navegador em ${new Date(lastAutoSavedAt).toLocaleTimeString('pt-BR')}`}
+              >
+                <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                <span className="hidden sm:inline">Salvo no navegador</span>
+                <span className="text-[10px] text-emerald-600 font-mono">
+                  {new Date(lastAutoSavedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            ) : null}
+
             <button
               onClick={onFillExample}
               className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all shadow-xs"

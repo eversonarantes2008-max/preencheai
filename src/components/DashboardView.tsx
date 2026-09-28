@@ -20,6 +20,8 @@ import {
 import { DocumentTemplate, GeneratedDocument } from '../types/document';
 import { processUploadedPdf } from '../services/pdfUploadService';
 import { ManageTagsModal } from './ManageTagsModal';
+import { Cloud, Building2 } from 'lucide-react';
+import { sharePointClient } from '../services/sharePointClientService';
 
 interface DashboardViewProps {
   templates: DocumentTemplate[];
@@ -33,7 +35,7 @@ interface DashboardViewProps {
   onDeleteTemplate?: (templateId: string) => void;
   onDeleteHistoryDoc?: (docId: string) => void;
   onClearAllHistory?: () => void;
-  onNavigateView?: (view: 'dashboard' | 'form' | 'editor' | 'preview' | 'history') => void;
+  onNavigateView?: (view: 'dashboard' | 'form' | 'editor' | 'preview' | 'history' | 'sharepoint') => void;
   onUpdateTemplateTags?: (templateId: string, tags: string[]) => void;
 }
 
@@ -261,6 +263,38 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           )}
         </div>
+      </div>
+
+      {/* Banner Corporativo Dahruj GWM SharePoint */}
+      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl p-5 shadow-sm border border-blue-900/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-blue-600/30 border border-blue-400/40 flex items-center justify-center shrink-0">
+            <Cloud className="w-6 h-6 text-blue-300" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-300">
+                Armazenamento Corporativo SharePoint • Dahruj GWM
+              </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400" title="Ativo" />
+            </div>
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl">
+              Organização automática por filial (<strong>Jundiaí, Campinas, Sorocaba</strong>) e pasta individual por cliente com versionamento independente por tipo de documento.
+            </p>
+          </div>
+        </div>
+
+        {onNavigateView && (
+          <button
+            type="button"
+            onClick={() => onNavigateView('sharepoint')}
+            className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 transition-all shadow-sm shrink-0 cursor-pointer"
+          >
+            <Cloud className="w-3.5 h-3.5" />
+            <span>Acessar Arquivos no SharePoint</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Menu com Opções Rápidas */}

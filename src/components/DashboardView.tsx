@@ -1,26 +1,25 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import {
   FileText,
   Sparkles,
   Sliders,
   UploadCloud,
-  CheckCircle2,
   Clock,
   ArrowRight,
   Download,
-  Copy,
-  Layers,
-  ChevronRight,
-  ShieldCheck,
-  Cpu,
   Trash2,
   Loader2,
+  Search,
+  CheckCircle2,
   FileCheck2,
-  Plus
+  History,
+  FolderOpen,
+  Tag,
+  X
 } from 'lucide-react';
 import { DocumentTemplate, GeneratedDocument } from '../types/document';
 import { processUploadedPdf } from '../services/pdfUploadService';
-import { DiagnosticPanel } from './DiagnosticPanel';
+import { ManageTagsModal } from './ManageTagsModal';
 
 interface DashboardViewProps {
   templates: DocumentTemplate[];
@@ -34,13 +33,40 @@ interface DashboardViewProps {
   onDeleteTemplate?: (templateId: string) => void;
   onDeleteHistoryDoc?: (docId: string) => void;
   onClearAllHistory?: () => void;
+  onNavigateView?: (view: 'dashboard' | 'form' | 'editor' | 'preview' | 'history') => void;
+  onUpdateTemplateTags?: (templateId: string, tags: string[]) => void;
 }
+
+export const getTagColorClass = (tag: string, isSelected: boolean = false) => {
+  if (isSelected) {
+    return 'bg-blue-600 text-white font-semibold shadow-2xs border-blue-600';
+  }
+  const lower = tag.toLowerCase().trim();
+  if (lower === 'legal' || lower === 'jurídico' || lower === 'juridico') {
+    return 'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100/90 border border-indigo-200/70';
+  }
+  if (lower === 'hr' || lower === 'rh' || lower === 'recursos humanos') {
+    return 'bg-purple-50/80 text-purple-700 hover:bg-purple-100/90 border border-purple-200/70';
+  }
+  if (lower === 'sales' || lower === 'vendas' || lower === 'comercial') {
+    return 'bg-emerald-50/80 text-emerald-700 hover:bg-emerald-100/90 border border-emerald-200/70';
+  }
+  if (lower === 'finance' || lower === 'financeiro') {
+    return 'bg-amber-50/80 text-amber-800 hover:bg-amber-100/90 border border-amber-200/70';
+  }
+  if (lower === 'compliance' || lower === 'operações' || lower === 'operacoes' || lower === 'operations') {
+    return 'bg-cyan-50/80 text-cyan-800 hover:bg-cyan-100/90 border border-cyan-200/70';
+  }
+  if (lower === 'upload' || lower === 'personalizado') {
+    return 'bg-sky-50/80 text-sky-700 hover:bg-sky-100/90 border border-sky-200/70';
+  }
+  return 'bg-slate-100/90 text-slate-700 hover:bg-slate-200/90 border border-slate-200/80';
+};
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   templates,
   recentDocuments,
   onSelectTemplate,
-  onOpenTeachModal,
   onOpenCalibrator,
   onFillExample,
   onDownloadHistoryDoc,
@@ -48,12 +74,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onDeleteTemplate,
   onDeleteHistoryDoc,
   onClearAllHistory,
+  onNavigateView,
+  onUpdateTemplateTags,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'builtin' | 'custom'>('all');
+  const [selectedTag, setSelectedTag] = useState<string>('all');
+  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+  const [tagModalTemplate, setTagModalTemplate] = useState<DocumentTemplate | null>(null);
 
-  const defaultTemplate = templates.find((t) => t.id === 'template_termo_responsabilidade') || templates[0];
+  const defaultTemplate = useMemo(() => {
+    return (
+      templates.find((t) => t.id === 'template_comodato_veiculo') ||
+      templates[0]
+    );
+  }, [templates]);
+
+  // Compute all tags and frequency counts across all templates
+  const allTagsWithCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    templates.forEach((t) => {
+      (t.tags || []).forEach((tag) => {
+        const trimmed = tag.trim();
+        if (trimmed) {
+          counts[trimmed] = (counts[trimmed] || 0) + 1;
+        }
+      });
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [templates]);
+
+  const allExistingTagNames = useMemo(() => {
+    return allTagsWithCounts.map(([name]) => name);
+  }, [allTagsWithCounts]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,9 +156,72 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
   };
 
+  // Filter templates based on search, official/custom category, and selected tag
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((template) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        template.name.toLowerCase().includes(q) ||
+        (template.description && template.description.toLowerCase().includes(q)) ||
+        (template.tags && template.tags.some((t) => t.toLowerCase().includes(q)));
+
+      if (!matchesSearch) return false;
+
+      if (selectedFilter === 'builtin' && !template.is_built_in) return false;
+      if (selectedFilter === 'custom' && template.is_built_in) return false;
+
+      if (selectedTag !== 'all') {
+        if (!template.tags || !template.tags.includes(selectedTag)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [templates, searchQuery, selectedFilter, selectedTag]);
+
+  // Determine if default template is prominently featured or filtered out
+  const isFeaturedCardVisible = useMemo(() => {
+    if (!defaultTemplate) return false;
+
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      defaultTemplate.name.toLowerCase().includes(q) ||
+      (defaultTemplate.description && defaultTemplate.description.toLowerCase().includes(q)) ||
+      (defaultTemplate.tags && defaultTemplate.tags.some((t) => t.toLowerCase().includes(q)));
+
+    if (!matchesSearch) return false;
+
+    if (selectedFilter === 'builtin' && !defaultTemplate.is_built_in) return false;
+    if (selectedFilter === 'custom' && defaultTemplate.is_built_in) return false;
+
+    if (selectedTag !== 'all') {
+      if (!defaultTemplate.tags || !defaultTemplate.tags.includes(selectedTag)) {
+        return false;
+      }
+    }
+
+    return true;
+  }, [defaultTemplate, searchQuery, selectedFilter, selectedTag]);
+
+  // In the catalog grid, display templates excluding defaultTemplate ONLY if defaultTemplate is already in the featured hero card
+  const displayedGridTemplates = useMemo(() => {
+    if (isFeaturedCardVisible && defaultTemplate) {
+      return filteredTemplates.filter((t) => t.id !== defaultTemplate.id);
+    }
+    return filteredTemplates;
+  }, [filteredTemplates, isFeaturedCardVisible, defaultTemplate]);
+
+  const handleOpenTagModal = (template: DocumentTemplate) => {
+    setTagModalTemplate(template);
+    setIsTagModalOpen(true);
+  };
+
   return (
-    <div className="space-y-6 pb-12">
-      {/* Hidden File Input for Dashboard */}
+    <div className="space-y-8 pb-16">
+      {/* Hidden File Input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -111,293 +230,611 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         className="hidden"
       />
 
-      {/* Main Upload Dropzone Banner */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        className={`relative overflow-hidden rounded-2xl border-2 transition-all p-6 sm:p-8 ${
-          dragOver
-            ? 'border-blue-600 bg-blue-50/80 ring-4 ring-blue-100'
-            : 'border-slate-200 bg-white hover:border-blue-300 shadow-xs'
-        }`}
-      >
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider">
-              <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
-              Upload Direto de Arquivo PDF
+      {/* Header Section: Clean & Professional Title */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Central de Documentos
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Selecione o documento para preencher os dados, organize por etiquetas ou importe novos PDFs.
+          </p>
+        </div>
+
+        {/* Quick Search */}
+        <div className="relative w-full md:w-80">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por nome, descrição ou etiqueta..."
+            className="w-full pl-9 pr-8 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-medium p-0.5 rounded cursor-pointer"
+              title="Limpar busca"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Menu com Opções Rápidas */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Menu de Opções Rápidas
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Opção 1: Preenchimento do Modelo Padrão */}
+          <button
+            onClick={() => {
+              if (defaultTemplate) onSelectTemplate(defaultTemplate);
+            }}
+            className="text-left bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50/20 rounded-xl p-4 transition-all group flex flex-col justify-between shadow-xs cursor-pointer"
+          >
+            <div>
+              <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <FileText className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                Preencher Documento Padrão
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                Instrumento Particular de Comodato de Veículo (7 páginas oficiais).
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-blue-600">
+              <span>Iniciar preenchimento</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </button>
+
+          {/* Opção 2: Fazer Upload de PDF */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="text-left bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50/20 rounded-xl p-4 transition-all group flex flex-col justify-between shadow-xs cursor-pointer"
+          >
+            <div>
+              <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                {isUploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <UploadCloud className="w-4 h-4" />
+                )}
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                Importar Novo PDF
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                Envie qualquer arquivo PDF para definir como modelo de preenchimento.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-indigo-600">
+              <span>{isUploading ? 'Processando...' : 'Selecionar arquivo'}</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </button>
+
+          {/* Opção 3: Preencher com Dados de Teste */}
+          <button
+            onClick={onFillExample}
+            className="text-left bg-white border border-slate-200 hover:border-amber-500 hover:bg-amber-50/20 rounded-xl p-4 transition-all group flex flex-col justify-between shadow-xs cursor-pointer"
+          >
+            <div>
+              <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 group-hover:text-amber-700 transition-colors">
+                Preencher com Exemplo
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                Carrega dados válidos de demonstração para testar a geração do PDF.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-amber-700">
+              <span>Carregar teste</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </button>
+
+          {/* Opção 4: Histórico de Documentos Gerados */}
+          <button
+            onClick={() => {
+              if (onNavigateView) onNavigateView('history');
+            }}
+            className="text-left bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/20 rounded-xl p-4 transition-all group flex flex-col justify-between shadow-xs cursor-pointer"
+          >
+            <div>
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <History className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                Histórico & Downloads
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                {recentDocuments.length > 0
+                  ? `${recentDocuments.length} documento(s) gerado(s) pronto(s) para download.`
+                  : 'Acesse e consulte todos os documentos PDF gerados.'}
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-emerald-700">
+              <span>Ver histórico</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Documento Principal em Destaque (Comodato de Veículo) */}
+      {isFeaturedCardVisible && defaultTemplate && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Documento Padrão Principal
+            </h2>
+            <span className="text-xs text-blue-600 font-medium">
+              Calibração Milimétrica Preservada
+            </span>
+          </div>
+
+          <div className="bg-white border-2 border-blue-500/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                  PDF
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 leading-snug">
+                    {defaultTemplate.name}
+                  </h3>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                    <span className="font-semibold text-blue-700">Modelo Oficial Padrão</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{defaultTemplate.page_count} páginas</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono tabular-nums">{defaultTemplate.fields.length} campos</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Diagramação 100% Intacta</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                {defaultTemplate.description ||
+                  'Instrumento de 7 páginas de comodato de veículo com cláusulas de conformidade, termos e dados de comodatária.'}
+              </p>
+
+              {/* Tags for Default Template */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                  <Tag className="w-3 h-3" />
+                  <span>Etiquetas:</span>
+                </span>
+                {defaultTemplate.tags && defaultTemplate.tags.length > 0 ? (
+                  defaultTemplate.tags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setSelectedTag(selectedTag === tag ? 'all' : tag)}
+                      className={`text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors cursor-pointer ${getTagColorClass(
+                        tag,
+                        selectedTag === tag
+                      )}`}
+                      title={`Filtrar documentos por etiqueta "${tag}"`}
+                    >
+                      {tag}
+                    </button>
+                  ))
+                ) : (
+                  <span className="text-[11px] text-slate-400 italic">Sem etiquetas</span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleOpenTagModal(defaultTemplate)}
+                  className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-800 font-medium px-2 py-0.5 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                  title="Editar etiquetas deste documento"
+                >
+                  <Tag className="w-3 h-3" />
+                  <span>Editar etiquetas</span>
+                </button>
+              </div>
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              Faça upload do seu documento PDF oficial
-            </h1>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+              <button
+                onClick={() => onSelectTemplate(defaultTemplate)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm py-2.5 px-5 rounded-lg flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <FileCheck2 className="w-4 h-4" />
+                <span>Preencher Este Documento</span>
+              </button>
 
-            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-              Arraste seu arquivo PDF aqui ou clique no botão abaixo. O arquivo enviado será definido como modelo padrão para preenchimento, calibração milimétrica e geração oficial.
+              <button
+                onClick={() => onOpenCalibrator(defaultTemplate)}
+                title="Ajustar coordenadas dos campos sobre o PDF"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-1.5 border border-slate-200 font-medium transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Sliders className="w-4 h-4 text-slate-600" />
+                <span>Calibrar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lista de Documentos a Serem Preenchidos */}
+      <div className="space-y-4">
+        {/* Section Header & Official/Custom Selector */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">
+              Documentos a Serem Preenchidos
+            </h2>
+            <p className="text-xs text-slate-500">
+              Selecione qualquer documento do catálogo para preencher os dados cadastrais
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto flex-shrink-0">
+          {/* Interactive filter control (Todos / Oficiais / Enviados) */}
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg shrink-0">
             <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold px-6 py-3.5 rounded-xl shadow-md shadow-blue-200 flex items-center justify-center gap-2 text-sm transition-all transform active:scale-95 cursor-pointer"
+              onClick={() => setSelectedFilter('all')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                selectedFilter === 'all'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              {isUploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>Processando PDF...</span>
-                </>
-              ) : (
-                <>
-                  <UploadCloud className="w-4 h-4 text-white" />
-                  <span>Selecionar Arquivo PDF</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              Todos ({templates.length})
+            </button>
+            <button
+              onClick={() => setSelectedFilter('builtin')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                selectedFilter === 'builtin'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Oficiais
+            </button>
+            <button
+              onClick={() => setSelectedFilter('custom')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                selectedFilter === 'custom'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Enviados ({templates.filter((t) => !t.is_built_in).length})
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3.5 shadow-xs">
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-900 font-mono">100%</div>
-            <div className="text-[11px] text-slate-500 font-medium">Preservação do PDF Original</div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3.5 shadow-xs">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
-            <Layers className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-900 font-mono">{templates.length}</div>
-            <div className="text-[11px] text-slate-500 font-medium">PDFs Cadastrados</div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3.5 shadow-xs">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
-            <Cpu className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-900 font-mono">Gemini 3.7</div>
-            <div className="text-[11px] text-slate-500 font-medium">Extração Inteligente por IA</div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3.5 shadow-xs">
-          <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600">
-            <Clock className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-900 font-mono">{recentDocuments.length}</div>
-            <div className="text-[11px] text-slate-500 font-medium">Documentos Gerados</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Diagnostic & Deployment Status Panel */}
-      <DiagnosticPanel />
-
-      {/* Main Content Grid: Templates + Recent Documents */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Templates Section (2 cols on large) */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-blue-600" />
-                Seus Arquivos PDF e Modelos Ativos
-              </h2>
-              <p className="text-xs text-slate-500">
-                Selecione um PDF para preencher os dados ou calibrar as coordenadas
-              </p>
-            </div>
-
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 hover:underline cursor-pointer"
-            >
-              + Upload de Novo PDF
-            </button>
+        {/* Tag Filtering Bar: Categorize and filter templates by labels like Legal, HR, Sales */}
+        <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-100/70 border border-slate-200/80 rounded-xl">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 px-2 shrink-0">
+            <Tag className="w-3.5 h-3.5 text-slate-400" />
+            <span>Filtrar por Etiqueta:</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {templates.map((template) => (
-              <div
-                key={template.id}
-                className="bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-5 transition-all shadow-xs flex flex-col justify-between group relative"
+          <button
+            type="button"
+            onClick={() => setSelectedTag('all')}
+            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer shrink-0 ${
+              selectedTag === 'all'
+                ? 'bg-slate-900 text-white shadow-2xs font-semibold'
+                : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/80'
+            }`}
+          >
+            Todas as Etiquetas ({templates.length})
+          </button>
+
+          {allTagsWithCounts.map(([tag, count]) => {
+            const isSelected = selectedTag === tag;
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setSelectedTag(isSelected ? 'all' : tag)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer shrink-0 ${getTagColorClass(
+                  tag,
+                  isSelected
+                )}`}
+                title={`Filtrar por etiqueta "${tag}" (${count} documentos)`}
               >
-                <div>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-xs">
+                <span>{tag}</span>
+                <span
+                  className={`text-[10px] font-mono rounded px-1 ${
+                    isSelected
+                      ? 'bg-blue-700/60 text-white'
+                      : 'bg-black/5 text-slate-600 font-semibold'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+
+          {selectedTag !== 'all' && (
+            <button
+              type="button"
+              onClick={() => setSelectedTag('all')}
+              className="inline-flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 font-medium px-2 py-1 rounded hover:bg-rose-50 transition-colors ml-auto cursor-pointer shrink-0"
+              title="Limpar filtro de etiqueta"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Limpar etiqueta</span>
+            </button>
+          )}
+        </div>
+
+        {/* Templates Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {displayedGridTemplates.map((template) => (
+            <div
+              key={template.id}
+              className="bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-4 transition-all shadow-xs flex flex-col justify-between group"
+            >
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold">
                       PDF
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                        {template.is_built_in ? 'PADRÃO INICIAL' : 'PDF DO USUÁRIO'}
-                      </span>
-                      {onDeleteTemplate && !template.is_built_in && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm(`Deseja remover o modelo "${template.name}"?`)) {
-                              onDeleteTemplate(template.id);
-                            }
-                          }}
-                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
-                          title="Remover este arquivo"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors">
-                    {template.name}
-                  </h3>
-                  <p className="text-xs text-slate-500 line-clamp-2 mt-1 mb-4">
-                    {template.description || 'Arquivo PDF estruturado para preenchimento de campos.'}
-                  </p>
-
-                  <div className="flex items-center gap-4 text-xs text-slate-500 border-t border-slate-100 pt-3 mb-4">
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-semibold">Campos</span>
-                      <span className="text-slate-800 font-semibold">{template.fields.length} campos</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-semibold">Dimensões</span>
-                      <span className="text-slate-800 font-semibold">{Math.round(template.page_width)} × {Math.round(template.page_height)} pt</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-semibold">Páginas</span>
-                      <span className="text-slate-800 font-semibold">{template.page_count} pág</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                  <button
-                    onClick={() => onSelectTemplate(template)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Preencher Dados</span>
-                  </button>
-                  <button
-                    onClick={() => onOpenCalibrator(template)}
-                    title="Calibrar Coordenadas dos Campos sobre o PDF"
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1 border border-slate-200 font-medium transition-colors cursor-pointer"
-                  >
-                    <Sliders className="w-3.5 h-3.5 text-slate-600" />
-                    <span>Calibrar</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Documents History Sidebar */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-600" />
-              Documentos Recentes
-            </h2>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 font-medium">{recentDocuments.length} itens</span>
-              {recentDocuments.length > 0 && onClearAllHistory && (
-                <button
-                  onClick={() => {
-                    if (window.confirm('Tem certeza que deseja excluir todos os documentos gerados do histórico?')) {
-                      onClearAllHistory();
-                    }
-                  }}
-                  className="text-[11px] text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-medium px-2 py-0.5 rounded transition-colors cursor-pointer"
-                  title="Limpar todos os arquivos do histórico"
-                >
-                  Limpar tudo
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-xs">
-            {recentDocuments.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-xs space-y-2">
-                <FileText className="w-8 h-8 mx-auto opacity-40 text-slate-400" />
-                <p className="font-medium text-slate-600">Nenhum documento gerado ainda.</p>
-                <p className="text-[11px] text-slate-400">
-                  Faça upload do seu PDF ou selecione um modelo para gerar o documento oficial.
-                </p>
-              </div>
-            ) : (
-              recentDocuments.slice(0, 5).map((doc) => (
-                <div
-                  key={doc.id}
-                  className="bg-slate-50 hover:bg-blue-50/50 border border-slate-200/80 rounded-lg p-3 transition-colors flex items-center justify-between gap-2 group"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-semibold text-slate-800 truncate" title={doc.file_name}>
-                      {doc.file_name}
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-1">
-                      <span>{new Date(doc.created_at).toLocaleDateString('pt-BR')}</span>
-                      <span>•</span>
-                      <span className="text-emerald-600 font-semibold">Pronto</span>
+                    <div className="text-[11px] text-slate-500 font-medium">
+                      <span>{template.page_count} pág</span>
+                      <span className="mx-1.5" aria-hidden="true">·</span>
+                      <span className="font-mono tabular-nums">{template.fields.length} campos</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => onDownloadHistoryDoc(doc)}
-                      title="Baixar PDF"
-                      className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-md transition-colors cursor-pointer"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenTagModal(template);
+                      }}
+                      className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+                      title="Gerenciar etiquetas deste documento"
                     >
-                      <Download className="w-3.5 h-3.5" />
+                      <Tag className="w-3.5 h-3.5" />
                     </button>
-                    {onDeleteHistoryDoc && (
+
+                    {onDeleteTemplate && !template.is_built_in && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (window.confirm(`Deseja excluir o arquivo "${doc.file_name}" do histórico?`)) {
-                            onDeleteHistoryDoc(doc.id);
+                          if (confirm(`Deseja remover o modelo "${template.name}"?`)) {
+                            onDeleteTemplate(template.id);
                           }
                         }}
-                        title="Excluir este arquivo"
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                        title="Excluir este documento"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
                 </div>
-              ))
-            )}
 
-            {recentDocuments.length > 0 && (
-              <div className="pt-2 text-center border-t border-slate-100">
-                <span className="text-[11px] text-slate-400">
-                  Histórico salvo localmente com segurança
-                </span>
+                <h3 className="font-semibold text-sm text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                  {template.name}
+                </h3>
+                <p className="text-xs text-slate-500 line-clamp-2 mt-1 mb-2">
+                  {template.description || 'Documento PDF com campos estruturados para preenchimento oficial.'}
+                </p>
+
+                {/* Tags on Card */}
+                <div className="flex flex-wrap items-center gap-1 mb-3">
+                  {template.tags && template.tags.length > 0 ? (
+                    template.tags.map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTag(selectedTag === tag ? 'all' : tag);
+                        }}
+                        className={`text-[10px] font-medium px-2 py-0.5 rounded-md transition-colors cursor-pointer ${getTagColorClass(
+                          tag,
+                          selectedTag === tag
+                        )}`}
+                        title={`Filtrar por etiqueta "${tag}"`}
+                      >
+                        {tag}
+                      </button>
+                    ))
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic">Sem etiquetas</span>
+                  )}
+                </div>
               </div>
-            )}
+
+              <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => onSelectTemplate(template)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Preencher</span>
+                </button>
+                <button
+                  onClick={() => onOpenCalibrator(template)}
+                  title="Ajustar coordenadas dos campos"
+                  className="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1 border border-slate-200 font-medium transition-colors cursor-pointer"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Calibrar</span>
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Drag & Drop / Upload Card in the Grid */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-xl p-5 transition-all flex flex-col items-center justify-center text-center cursor-pointer min-h-[160px] ${
+              dragOver
+                ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-200'
+                : 'border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/30'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 text-slate-500 flex items-center justify-center mb-2 shadow-xs">
+              {isUploading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+              ) : (
+                <UploadCloud className="w-4 h-4 text-blue-600" />
+              )}
+            </div>
+            <span className="text-xs font-semibold text-slate-800">
+              {isUploading ? 'Processando PDF...' : '+ Adicionar Novo Arquivo PDF'}
+            </span>
+            <span className="text-[11px] text-slate-400 mt-0.5">
+              Clique ou arraste um arquivo PDF para este local
+            </span>
           </div>
         </div>
+
+        {displayedGridTemplates.length === 0 && !isFeaturedCardVisible && (
+          <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
+            <FolderOpen className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+            <p className="text-sm font-medium text-slate-700">Nenhum documento encontrado</p>
+            <p className="text-xs text-slate-400 mt-1">
+              {selectedTag !== 'all'
+                ? `Nenhum documento com a etiqueta "${selectedTag}".`
+                : 'Tente ajustar o termo da busca ou o filtro selecionado.'}
+            </p>
+            {selectedTag !== 'all' && (
+              <button
+                type="button"
+                onClick={() => setSelectedTag('all')}
+                className="mt-3 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 rounded-lg transition-colors cursor-pointer"
+              >
+                Limpar filtro de etiqueta
+              </button>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Histórico Recente de Documentos Preenchidos */}
+      {recentDocuments.length > 0 && (
+        <div className="space-y-3 pt-4 border-t border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-600" />
+                Documentos Preenchidos Recentemente
+              </h2>
+              <p className="text-xs text-slate-500">
+                Acesse e baixe os arquivos em PDF oficiais gerados recentemente
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {onClearAllHistory && (
+                <button
+                  onClick={() => {
+                    if (window.confirm('Deseja limpar todos os documentos do histórico?')) {
+                      onClearAllHistory();
+                    }
+                  }}
+                  className="text-xs text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                >
+                  Limpar histórico
+                </button>
+              )}
+              {onNavigateView && (
+                <button
+                  onClick={() => onNavigateView('history')}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Ver todos ({recentDocuments.length})</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100 shadow-xs overflow-hidden">
+            {recentDocuments.slice(0, 4).map((doc) => (
+              <div
+                key={doc.id}
+                className="p-3.5 hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-slate-900 truncate" title={doc.file_name}>
+                      {doc.file_name}
+                    </p>
+                    <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                      <span>{doc.template_name}</span>
+                      <span aria-hidden="true">·</span>
+                      <span className="font-mono tabular-nums">
+                        {new Date(doc.created_at).toLocaleDateString('pt-BR')} às{' '}
+                        {new Date(doc.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => onDownloadHistoryDoc(doc)}
+                    className="inline-flex items-center gap-1 text-xs font-medium py-1.5 px-3 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 rounded-md transition-colors cursor-pointer"
+                    title="Baixar arquivo PDF oficial"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Baixar</span>
+                  </button>
+                  {onDeleteHistoryDoc && (
+                    <button
+                      onClick={() => onDeleteHistoryDoc(doc.id)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                      title="Excluir do histórico"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Managing Template Tags */}
+      <ManageTagsModal
+        isOpen={isTagModalOpen}
+        template={tagModalTemplate}
+        allExistingTags={allExistingTagNames}
+        onClose={() => {
+          setIsTagModalOpen(false);
+          setTagModalTemplate(null);
+        }}
+        onSaveTags={(templateId, newTags) => {
+          if (onUpdateTemplateTags) {
+            onUpdateTemplateTags(templateId, newTags);
+          }
+        }}
+      />
     </div>
   );
 };

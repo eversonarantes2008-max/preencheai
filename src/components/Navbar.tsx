@@ -76,66 +76,55 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
           <div
-            className="flex items-center gap-3 cursor-pointer select-none"
+            className="flex items-center gap-2.5 cursor-pointer select-none"
             onClick={() => onNavigate('dashboard')}
           >
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-xs">
               <div className="w-3.5 h-3.5 border-2 border-white rounded-xs rotate-45"></div>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-blue-900 font-sans">
-                  PREENCHENDO <span className="text-blue-600">AI</span>
-                </h1>
-                <span className="hidden md:inline px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full">
-                  SISTEMA DOCUMENTAL
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 hidden sm:block">
-                Preenchimento Inteligente de Documentos PDF
-              </p>
-            </div>
+            <span className="text-lg font-bold tracking-tight text-slate-900">
+              Doc Preenchedor
+            </span>
           </div>
 
-          {/* Navigation links styled like the Sleek Interface tabs */}
+          {/* Navigation links */}
           <nav className="hidden md:flex items-center gap-6">
             <button
               onClick={() => onNavigate('dashboard')}
-              className={`text-sm font-medium py-5 transition-colors ${
+              className={`text-sm font-medium py-5 transition-colors whitespace-nowrap cursor-pointer ${
                 currentView === 'dashboard'
                   ? 'text-slate-900 border-b-2 border-blue-600 font-semibold'
                   : 'text-slate-600 hover:text-blue-600'
               }`}
             >
-              Documentos & Templates
+              Documentos
             </button>
 
             <button
               onClick={() => onNavigate('form')}
-              className={`text-sm font-medium py-5 transition-colors flex items-center gap-1.5 ${
+              className={`text-sm font-medium py-5 transition-colors whitespace-nowrap cursor-pointer ${
                 currentView === 'form'
                   ? 'text-slate-900 border-b-2 border-blue-600 font-semibold'
                   : 'text-slate-600 hover:text-blue-600'
               }`}
             >
-              <span>Preencher</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              Preencher
             </button>
 
             <button
               onClick={() => onNavigate('editor')}
-              className={`text-sm font-medium py-5 transition-colors flex items-center gap-1.5 ${
+              className={`text-sm font-medium py-5 transition-colors whitespace-nowrap cursor-pointer ${
                 currentView === 'editor'
                   ? 'text-slate-900 border-b-2 border-blue-600 font-semibold'
                   : 'text-slate-600 hover:text-blue-600'
               }`}
             >
-              <span>Calibrador Visual</span>
+              Calibrador Visual
             </button>
 
             <button
               onClick={() => onNavigate('history')}
-              className={`text-sm font-medium py-5 transition-colors ${
+              className={`text-sm font-medium py-5 transition-colors whitespace-nowrap cursor-pointer ${
                 currentView === 'history'
                   ? 'text-slate-900 border-b-2 border-blue-600 font-semibold'
                   : 'text-slate-600 hover:text-blue-600'

@@ -76,6 +76,7 @@ export interface DocumentTemplate {
   updated_at: string;
   is_built_in?: boolean;
   thumbnail_data?: string;
+  tags?: string[];
 }
 
 export interface GeneratedDocument {

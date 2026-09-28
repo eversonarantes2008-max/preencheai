@@ -31,9 +31,10 @@ import { DatabaseSchemaModal } from './components/DatabaseSchemaModal';
 
 export default function App() {
   const [templates, setTemplates] = useState<DocumentTemplate[]>(() => loadAllTemplates());
-  const [activeTemplate, setActiveTemplate] = useState<DocumentTemplate>(
-    () => loadAllTemplates()[0] || BUILT_IN_TEMPLATE_RESPONSABILIDADE
-  );
+  const [activeTemplate, setActiveTemplate] = useState<DocumentTemplate>(() => {
+    const all = loadAllTemplates();
+    return all.find((t) => t.id === 'template_comodato_veiculo') || all[0] || BUILT_IN_TEMPLATE_RESPONSABILIDADE;
+  });
   const [currentView, setCurrentView] = useState<
     'dashboard' | 'form' | 'editor' | 'preview' | 'history'
   >('dashboard');
@@ -204,6 +205,18 @@ export default function App() {
     }
   };
 
+  const handleUpdateTemplateTags = (templateId: string, tags: string[]) => {
+    const target = templates.find((t) => t.id === templateId);
+    if (!target) return;
+    const updatedTemplate = { ...target, tags };
+    saveTemplate(updatedTemplate);
+    const updated = loadAllTemplates();
+    setTemplates(updated);
+    if (activeTemplate.id === templateId) {
+      setActiveTemplate(updatedTemplate);
+    }
+  };
+
   const handleConfirmPreview = () => {
     setIsReviewOpen(false);
     setCurrentView('preview');
@@ -285,12 +298,16 @@ export default function App() {
             onDeleteTemplate={handleDeleteTemplate}
             onDeleteHistoryDoc={handleDeleteHistoryDoc}
             onClearAllHistory={handleClearAllHistory}
+            onNavigateView={setCurrentView}
+            onUpdateTemplateTags={handleUpdateTemplateTags}
           />
         )}
 
         {currentView === 'form' && (
           <SmartFormView
             template={activeTemplate}
+            templates={templates}
+            onSelectTemplate={setActiveTemplate}
             formValues={formValues}
             confidenceScores={confidenceScores}
             onValueChange={handleValueChange}
@@ -305,6 +322,8 @@ export default function App() {
         {currentView === 'editor' && (
           <VisualEditorView
             template={activeTemplate}
+            templates={templates}
+            onSelectTemplate={setActiveTemplate}
             onSaveTemplate={handleSaveCalibratedTemplate}
             onResetDefault={handleResetDefaultTemplate}
             onNavigateToForm={() => setCurrentView('form')}

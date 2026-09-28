@@ -1040,19 +1040,21 @@ export async function generateMasterComodatoVeiculoPdf(): Promise<Uint8Array> {
   const p1 = createPageHelpers(page1);
 
   // Título
-  p1.drawTxt('INSTRUMENTO PARTICULAR DE COMODATO DE VEÍCULO', 130, 85, 10, true);
+  const titleText = 'INSTRUMENTO PARTICULAR DE COMODATO DE VEÍCULO';
+  const titleWidth = fontBold.widthOfTextAtSize(titleText, 10);
+  p1.drawTxt(titleText, Math.round((PAGE_WIDTH - titleWidth) / 2), 85, 10, true);
 
   // Preâmbulo
   p1.drawTxt('Por este instrumento particular, de um lado CMD GW COMERCIO DE VEÍCULOS', 70, 155, 8.5);
   p1.drawTxt('AUTOMOTORES LTDA., pessoa jurídica de direito privado, pessoa jurídica de direito', 70, 169, 8.5);
-  p1.drawTxt('priva538-56do, devidamente constituída e inscrita no CNPJ/MF sob o nº. 48.967.629/0004-84,', 70, 183, 8.5);
+  p1.drawTxt('privado, devidamente constituída e inscrita no CNPJ/MF sob o nº. 48.967.629/0004-84,', 70, 183, 8.5);
   p1.drawTxt('com sede em JUNDIAÍ, na AV NOVE DE JULHO, 380 - Jundiaí, CEP 13209-010,', 70, 197, 8.5);
   
   p1.drawTxt('aqui denominado simplesmente COMODANTE, e, de outro lado', 70, 211, 8.5);
   p1.drawHLine(345, 211, 520, 0.6);
 
   p1.drawTxt('portador(a) da Cédula de Identidade nº', 70, 225, 8.5);
-  p1.drawHLine(235, 225, 345, 0.6);
+  p1.drawHLine(235, 225, 520, 0.6);
 
   p1.drawTxt(', inscrito(a) no CPF sob o nº', 70, 239, 8.5);
   p1.drawHLine(185, 239, 335, 0.6);
@@ -1061,9 +1063,8 @@ export async function generateMasterComodatoVeiculoPdf(): Promise<Uint8Array> {
   p1.drawTxt('na Cidade de', 70, 253, 8.5);
   p1.drawHLine(125, 253, 215, 0.6);
   p1.drawTxt(', Estado S. PAULO, na', 218, 253, 8.5);
-  p1.drawHLine(320, 253, 495, 0.6);
-  p1.drawTxt(',', 497, 253, 8.5);
-  p1.drawHLine(500, 253, 525, 0.6);
+  p1.drawHLine(320, 253, 518, 0.6);
+  p1.drawTxt(',', 520, 253, 8.5);
 
   p1.drawTxt('Bairro:', 70, 267, 8.5);
   p1.drawHLine(105, 267, 225, 0.6);
@@ -1444,16 +1445,20 @@ export async function renderDocumentPdf(
     
     // Check aliases if exact key is not directly provided
     if (rawVal === undefined || rawVal === null || rawVal === '') {
-      if (field.field_key === 'declarante_nome' || field.field_key === 'cliente_nome' || field.field_key === 'proprietario_nome' || field.field_key === 'vendedor_nome') {
-        rawVal = safeValues.vendedor_nome || safeValues.declarante_nome || safeValues.cliente_nome || safeValues.proprietario_nome || safeValues.nome_completo || safeValues.nome || '';
-      } else if (field.field_key === 'declarante_cpf' || field.field_key === 'cliente_cpf' || field.field_key === 'proprietario_cpf' || field.field_key === 'vendedor_cpf') {
-        rawVal = safeValues.vendedor_cpf || safeValues.declarante_cpf || safeValues.cliente_cpf || safeValues.proprietario_cpf || safeValues.cpf || safeValues.cpf_cnpj || '';
-      } else if (field.field_key === 'declarante_rg' || field.field_key === 'cliente_rg' || field.field_key === 'vendedor_rg') {
-        rawVal = safeValues.vendedor_rg || safeValues.declarante_rg || safeValues.cliente_rg || safeValues.rg || '';
+      if (field.field_key === 'declarante_nome' || field.field_key === 'cliente_nome' || field.field_key === 'proprietario_nome' || field.field_key === 'vendedor_nome' || field.field_key === 'comodataria_nome' || field.field_key === 'titular_nome') {
+        rawVal = safeValues[field.field_key] || safeValues.vendedor_nome || safeValues.declarante_nome || safeValues.cliente_nome || safeValues.proprietario_nome || safeValues.comodataria_nome || safeValues.titular_nome || safeValues.razao_social || safeValues.nome_completo || safeValues.nome || '';
+      } else if (field.field_key === 'declarante_cpf' || field.field_key === 'cliente_cpf' || field.field_key === 'proprietario_cpf' || field.field_key === 'vendedor_cpf' || field.field_key === 'comodataria_cpf' || field.field_key === 'cliente_cpf_cnpj' || field.field_key === 'titular_cpf_cnpj') {
+        rawVal = safeValues[field.field_key] || safeValues.declarante_cnpj || safeValues.vendedor_cnpj || safeValues.cliente_cnpj || safeValues.proprietario_cnpj || safeValues.comodataria_cnpj || safeValues.titular_cnpj || safeValues.vendedor_cpf || safeValues.declarante_cpf || safeValues.cliente_cpf || safeValues.proprietario_cpf || safeValues.comodataria_cpf || safeValues.titular_cpf_cnpj || safeValues.cliente_cpf_cnpj || safeValues.cpf || safeValues.cnpj || safeValues.cpf_cnpj || '';
+      } else if (field.field_key === 'declarante_cnpj' || field.field_key === 'cliente_cnpj' || field.field_key === 'proprietario_cnpj' || field.field_key === 'vendedor_cnpj' || field.field_key === 'comodataria_cnpj') {
+        rawVal = safeValues[field.field_key] || safeValues.declarante_cpf || safeValues.vendedor_cpf || safeValues.cliente_cpf || safeValues.proprietario_cpf || safeValues.comodataria_cpf || safeValues.cnpj || safeValues.cpf || '';
+      } else if (field.field_key === 'declarante_rg' || field.field_key === 'cliente_rg' || field.field_key === 'vendedor_rg' || field.field_key === 'comodataria_rg' || field.field_key === 'proprietario_rg') {
+        rawVal = safeValues[field.field_key] || safeValues.vendedor_rg || safeValues.declarante_rg || safeValues.cliente_rg || safeValues.comodataria_rg || safeValues.proprietario_rg || safeValues.rg || '';
       } else if (field.field_key === 'comprador_nome' || field.field_key === 'empresa_nome') {
         rawVal = safeValues.comprador_nome || safeValues.empresa_nome || safeValues.razao_social || '';
-      } else if (field.field_key === 'empresa_cnpj') {
-        rawVal = safeValues.empresa_cnpj || safeValues.cnpj || safeValues.comprador_cnpj || '';
+      } else if (field.field_key === 'empresa_cnpj' || field.field_key === 'comprador_cnpj') {
+        rawVal = safeValues.empresa_cnpj || safeValues.comprador_cnpj || safeValues.cnpj || '';
+      } else if (field.field_key === 'comodataria_nome_assinatura' || field.field_key === 'vendedor_assinatura_nome') {
+        rawVal = safeValues[field.field_key] || safeValues.comodataria_nome || safeValues.vendedor_nome || safeValues.declarante_nome || safeValues.nome || '';
       }
     }
 

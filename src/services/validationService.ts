@@ -143,10 +143,17 @@ export function validateField(type: FieldType, value: string, required: boolean)
   }
 
   switch (type) {
-    case 'cpf':
+    case 'cpf': {
+      const digits = trimmed.replace(/\D/g, '');
+      if (digits.length > 11) {
+        return validateCNPJ(trimmed)
+          ? { isValid: true }
+          : { isValid: false, message: 'CNPJ inválido (dígitos verificadores incorretos)' };
+      }
       return validateCPF(trimmed)
         ? { isValid: true }
         : { isValid: false, message: 'CPF inválido (dígitos verificadores incorretos)' };
+    }
     case 'cnpj':
       return validateCNPJ(trimmed)
         ? { isValid: true }
@@ -190,6 +197,15 @@ export function applyMask(type: FieldType, rawValue: string): string {
 
   switch (type) {
     case 'cpf': {
+      // If 14 digits are typed, intelligently format as CNPJ
+      if (digitsOnly.length > 11) {
+        const d = digitsOnly.slice(0, 14);
+        if (d.length <= 2) return d;
+        if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+        if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+        if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+        return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12, 14)}`;
+      }
       const d = digitsOnly.slice(0, 11);
       if (d.length <= 3) return d;
       if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;

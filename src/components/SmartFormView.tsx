@@ -21,12 +21,16 @@ import {
   Layers,
   Wand2,
   FileUp,
-  Info
+  Info,
+  Sliders,
+  Tag
 } from 'lucide-react';
 import { extractDocumentData } from '../services/aiExtractionService';
 
 interface SmartFormViewProps {
   template: DocumentTemplate;
+  templates?: DocumentTemplate[];
+  onSelectTemplate?: (template: DocumentTemplate) => void;
   formValues: Record<string, string>;
   confidenceScores: Record<string, number>;
   onValueChange: (key: string, value: string) => void;
@@ -34,6 +38,7 @@ interface SmartFormViewProps {
   onFillExample: () => void;
   onClearForm: () => void;
   onProceedToReview: () => void;
+  onOpenCalibrator?: () => void;
 }
 
 const GROUP_METADATA: Record<
@@ -92,6 +97,8 @@ const GROUP_METADATA: Record<
 
 export const SmartFormView: React.FC<SmartFormViewProps> = ({
   template,
+  templates,
+  onSelectTemplate,
   formValues,
   confidenceScores,
   onValueChange,
@@ -99,12 +106,61 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
   onFillExample,
   onClearForm,
   onProceedToReview,
+  onOpenCalibrator,
 }) => {
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiRawText, setAiRawText] = useState('');
   const [isExtracting, setIsExtracting] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
+
+  // Dynamic Person Type per group (PF = Pessoa Física, PJ = Pessoa Jurídica)
+  const [groupPersonTypes, setGroupPersonTypes] = useState<Record<string, 'PF' | 'PJ'>>(() => {
+    const initial: Record<string, 'PF' | 'PJ'> = {};
+    const safeVals = formValues || {};
+    
+    // Check fields to detect default person types
+    (template.fields || []).forEach((field) => {
+      const g = field.group || 'declarante';
+      const val = (safeVals[field.field_key] || '').replace(/\D/g, '');
+      if (field.field_type === 'cnpj' || val.length > 11) {
+        initial[g] = 'PJ';
+      } else if (!initial[g]) {
+        initial[g] = 'PF';
+      }
+    });
+
+    return initial;
+  });
+
+  const getPersonTypeForGroup = (group: string): 'PF' | 'PJ' => {
+    return groupPersonTypes[group] || 'PF';
+  };
+
+  const handleTogglePersonType = (group: string, type: 'PF' | 'PJ') => {
+    setGroupPersonTypes((prev) => ({ ...prev, [group]: type }));
+
+    // Re-format existing doc field values if present
+    const groupFields = (template.fields || []).filter((f) => (f.group || 'outros') === group);
+    groupFields.forEach((field) => {
+      const isDocField =
+        field.field_type === 'cpf' ||
+        field.field_type === 'cnpj' ||
+        field.field_key.includes('cpf') ||
+        field.field_key.includes('cnpj') ||
+        field.field_key.includes('documento');
+
+      if (isDocField) {
+        const currentVal = formValues[field.field_key] || '';
+        const digits = currentVal.replace(/\D/g, '');
+        if (digits.length > 0) {
+          const targetType = type === 'PJ' ? 'cnpj' : 'cpf';
+          const masked = applyMask(targetType, digits);
+          onValueChange(field.field_key, masked);
+        }
+      }
+    });
+  };
 
   // Group fields logically
   const groupedFields = useMemo(() => {
@@ -140,7 +196,7 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
     })).filter((item) => item.fields.length > 0);
   }, [template]);
 
-  // Validation map
+  // Validation map considering selected Person Type
   const validations = useMemo(() => {
     const results: Record<string, FieldValidationResult> = {};
     const safeFormValues = formValues || {};
@@ -153,10 +209,17 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
           val = safeFormValues.declarante_nome || safeFormValues.nome || '';
         }
       }
-      results[field.field_key] = validateField(field.field_type, val, field.required);
+
+      const pType = getPersonTypeForGroup(field.group || 'outros');
+      let effectiveType = field.field_type;
+      if (field.field_type === 'cpf' && pType === 'PJ') {
+        effectiveType = 'cnpj';
+      }
+
+      results[field.field_key] = validateField(effectiveType, val, field.required);
     });
     return results;
-  }, [template, formValues]);
+  }, [template, formValues, groupPersonTypes]);
 
   // Count stats
   const stats = useMemo(() => {
@@ -200,10 +263,30 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
     };
   }, [template, formValues, validations]);
 
-  // Handle single field input with automatic mask
+  // Handle single field input with automatic mask and auto PJ detection
   const handleInputChange = (field: TemplateField, rawInput: string) => {
+    const pType = getPersonTypeForGroup(field.group || 'outros');
+    const digitsOnly = rawInput.replace(/\D/g, '');
+
+    // Auto switch to PJ if user pastes or types a 14-digit CNPJ into a document field
+    const isDocField =
+      field.field_type === 'cpf' ||
+      field.field_type === 'cnpj' ||
+      field.field_key.includes('cpf') ||
+      field.field_key.includes('cnpj') ||
+      field.field_key.includes('documento');
+
+    if (isDocField && digitsOnly.length > 11 && pType === 'PF') {
+      setGroupPersonTypes((prev) => ({ ...prev, [field.group || 'outros']: 'PJ' }));
+    }
+
+    let targetType = field.field_type;
+    if (isDocField) {
+      targetType = pType === 'PJ' || digitsOnly.length > 11 ? 'cnpj' : 'cpf';
+    }
+
     const masked = field.mask || field.field_type
-      ? applyMask(field.field_type, rawInput)
+      ? applyMask(targetType, rawInput)
       : rawInput;
     onValueChange(field.field_key, masked);
   };
@@ -255,15 +338,68 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
                 Formulário Inteligente
               </span>
               <span className="text-xs text-slate-500">
-                {template.name} ({template.version})
+                {template.is_built_in ? 'Modelo Padrão Oficial' : 'PDF Enviado pelo Usuário'}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               Preenchimento de Documento
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+
+            {/* Quick Document Option Switcher */}
+            {templates && templates.length > 0 && onSelectTemplate && (
+              <div className="mt-2 flex items-center gap-2">
+                <label htmlFor="select-template-doc" className="text-xs font-semibold text-slate-600 shrink-0">
+                  Documento Selecionado:
+                </label>
+                <select
+                  id="select-template-doc"
+                  value={template.id}
+                  onChange={(e) => {
+                    const found = templates.find((t) => t.id === e.target.value);
+                    if (found) onSelectTemplate(found);
+                  }}
+                  className="bg-slate-50 border border-slate-300 hover:border-blue-400 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-bold focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all max-w-sm sm:max-w-md truncate"
+                >
+                  <optgroup label="📋 Opções de Documentação Padrão Oficial (GWM / Dahruj)">
+                    {templates.filter((t) => t.is_built_in).map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.fields.length} campos)
+                      </option>
+                    ))}
+                  </optgroup>
+                  {templates.some((t) => !t.is_built_in) && (
+                    <optgroup label="📁 PDFs Enviados">
+                      {templates.filter((t) => !t.is_built_in).map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.fields.length} campos)
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              </div>
+            )}
+
+            <p className="text-xs text-slate-500 mt-1.5">
               Insira os dados abaixo. O sistema validará automaticamente CPF, CNPJ, Placa e formatará o PDF master.
             </p>
+
+            {template.tags && template.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                  <Tag className="w-3 h-3" />
+                  <span>Etiquetas:</span>
+                </span>
+                {template.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -283,6 +419,17 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
               <Wand2 className="w-3.5 h-3.5 text-blue-600" />
               <span>Preencher com IA</span>
             </button>
+
+            {onOpenCalibrator && (
+              <button
+                onClick={onOpenCalibrator}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all"
+                title="Calibrar coordenadas visuais dos campos sobre o PDF deste documento"
+              >
+                <Sliders className="w-3.5 h-3.5 text-slate-600" />
+                <span>Calibrar PDF</span>
+              </button>
+            )}
 
             <button
               onClick={onClearForm}
@@ -366,7 +513,7 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
             key={group}
             className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs transition-all"
           >
-            <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
+            <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center">
                   {meta.icon}
@@ -377,9 +524,69 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
                 </div>
               </div>
 
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">
-                {fields.length} campos
-              </span>
+              <div className="flex items-center gap-3 self-end sm:self-auto">
+                {/* Person Type Toggle (PF / PJ) */}
+                {(() => {
+                  const hasDocOrPersonField = fields.some(
+                    (f) =>
+                      f.field_type === 'cpf' ||
+                      f.field_type === 'cnpj' ||
+                      f.field_key.includes('cpf') ||
+                      f.field_key.includes('cnpj') ||
+                      f.field_key.includes('declarante') ||
+                      f.field_key.includes('vendedor') ||
+                      f.field_key.includes('cliente') ||
+                      f.field_key.includes('proprietario') ||
+                      f.field_key.includes('titular') ||
+                      f.field_key.includes('comodataria')
+                  );
+
+                  // Keep comprador fixed on Termo Responsabilidade as instructed
+                  const isFixedTermoResponsabilidadeCnpj =
+                    template.id === 'template_termo_responsabilidade' && group === 'comprador';
+
+                  if (!hasDocOrPersonField || isFixedTermoResponsabilidadeCnpj) {
+                    return null;
+                  }
+
+                  const currentPersonType = getPersonTypeForGroup(group);
+
+                  return (
+                    <div className="flex items-center bg-slate-200/70 p-0.5 rounded-lg border border-slate-300/60 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePersonType(group, 'PF')}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                          currentPersonType === 'PF'
+                            ? 'bg-white text-blue-700 shadow-xs font-bold'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        title="Preencher dados de Pessoa Física (CPF)"
+                      >
+                        <User className="w-3 h-3" />
+                        <span>Pessoa Física (CPF)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePersonType(group, 'PJ')}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                          currentPersonType === 'PJ'
+                            ? 'bg-blue-600 text-white shadow-xs font-bold'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        title="Preencher dados de Pessoa Jurídica (CNPJ)"
+                      >
+                        <Building2 className="w-3 h-3" />
+                        <span>Pessoa Jurídica (CNPJ)</span>
+                      </button>
+                    </div>
+                  );
+                })()}
+
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">
+                  {fields.length} campos
+                </span>
+              </div>
             </div>
 
             <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -388,6 +595,44 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
                 const validation = validations[field.field_key] || { isValid: true };
                 const confidence = confidenceScores[field.field_key];
                 const isInvalid = !validation.isValid && (value || field.required);
+                const currentPersonType = getPersonTypeForGroup(field.group || 'outros');
+
+                // Dynamic display labels and placeholders based on PF/PJ
+                let displayLabel = field.label;
+                let displayPlaceholder = field.test_value || field.description || 'Preencher... (ou ----)';
+
+                const isDocField =
+                  field.field_type === 'cpf' ||
+                  field.field_type === 'cnpj' ||
+                  field.field_key.includes('cpf') ||
+                  field.field_key.includes('cnpj') ||
+                  field.field_key.includes('documento');
+
+                const isNameField =
+                  field.field_key.endsWith('_nome') ||
+                  field.field_key === 'nome' ||
+                  field.field_key === 'nome_completo';
+
+                const isRgCnhField =
+                  field.field_type === 'rg' ||
+                  field.field_type === 'cnh' ||
+                  field.field_key.includes('rg') ||
+                  field.field_key.includes('cnh');
+
+                if (currentPersonType === 'PJ') {
+                  if (isDocField) {
+                    displayLabel = field.label.replace(/CPF/gi, 'CNPJ');
+                    if (!displayLabel.includes('CNPJ')) {
+                      displayLabel = `CNPJ (${field.label})`;
+                    }
+                    displayPlaceholder = '12.345.678/0001-90';
+                  } else if (isNameField && !field.label.toLowerCase().includes('comprador') && !field.label.toLowerCase().includes('concessionária')) {
+                    displayLabel = field.label.replace(/Nome/gi, 'Razão Social / Nome da Empresa');
+                    displayPlaceholder = 'Razão Social da Empresa Ltda';
+                  } else if (isRgCnhField && !field.field_key.includes('condutor') && !field.field_key.includes('testemunha')) {
+                    displayLabel = `${field.label} (Repres. Legal)`;
+                  }
+                }
 
                 return (
                   <div
@@ -405,7 +650,7 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
                   >
                     <div className="flex items-center justify-between gap-1">
                       <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                        <span>{field.label}</span>
+                        <span>{displayLabel}</span>
                         {field.required && <span className="text-blue-600 font-bold" title="Obrigatório">*</span>}
                       </label>
 
@@ -457,9 +702,15 @@ export const SmartFormView: React.FC<SmartFormViewProps> = ({
                         <input
                           type={field.field_type === 'number' ? 'number' : 'text'}
                           value={value}
-                          maxLength={field.max_length}
+                          maxLength={
+                            isDocField && currentPersonType === 'PJ'
+                              ? 18
+                              : isDocField && currentPersonType === 'PF'
+                              ? 14
+                              : field.max_length
+                          }
                           onChange={(e) => handleInputChange(field, e.target.value)}
-                          placeholder={field.test_value || field.description || 'Preencher... (ou ----)'}
+                          placeholder={displayPlaceholder}
                           className={`w-full bg-slate-50/70 border rounded-lg px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-all ${
                             isInvalid
                               ? 'border-rose-400 focus:ring-1 focus:ring-rose-500 bg-rose-50/30'

@@ -32,6 +32,8 @@ import { detectPdfFieldsWithAi } from '../services/aiExtractionService';
 
 interface VisualEditorViewProps {
   template: DocumentTemplate;
+  templates?: DocumentTemplate[];
+  onSelectTemplate?: (updatedTemplate: DocumentTemplate) => void;
   onSaveTemplate: (updatedTemplate: DocumentTemplate) => void;
   onResetDefault: () => void;
   onNavigateToForm: () => void;
@@ -39,6 +41,8 @@ interface VisualEditorViewProps {
 
 export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
   template,
+  templates,
+  onSelectTemplate,
   onSaveTemplate,
   onResetDefault,
   onNavigateToForm,
@@ -362,9 +366,39 @@ export const VisualEditorView: React.FC<VisualEditorViewProps> = ({
               <Sliders className="w-4 h-4 text-blue-600" />
               Editor Visual e Calibrador Milimétrico
             </h1>
-            <p className="text-xs text-slate-500">
-              Modelo ativo: <strong className="text-slate-700">{template.name}</strong> • {fields.length} campos mapeados
-            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs text-slate-500">Modelo:</span>
+              {templates && templates.length > 0 && onSelectTemplate ? (
+                <select
+                  value={template.id}
+                  onChange={(e) => {
+                    const found = templates.find((t) => t.id === e.target.value);
+                    if (found) onSelectTemplate(found);
+                  }}
+                  className="bg-slate-50 border border-slate-300 hover:border-blue-400 rounded-md px-2 py-0.5 text-xs text-slate-900 font-bold focus:ring-1 focus:ring-blue-500 focus:outline-hidden"
+                >
+                  <optgroup label="📋 Opções de Documentação Padrão Oficial">
+                    {templates.filter((t) => t.is_built_in).map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.fields.length} campos)
+                      </option>
+                    ))}
+                  </optgroup>
+                  {templates.some((t) => !t.is_built_in) && (
+                    <optgroup label="📁 PDFs Enviados">
+                      {templates.filter((t) => !t.is_built_in).map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.fields.length} campos)
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              ) : (
+                <strong className="text-xs text-slate-700">{template.name}</strong>
+              )}
+              <span className="text-xs text-slate-400">• {fields.length} campos</span>
+            </div>
           </div>
         </div>
 

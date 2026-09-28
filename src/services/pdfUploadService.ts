@@ -128,6 +128,7 @@ export async function processUploadedPdf(file: File): Promise<UploadPdfResult> {
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     file_url: base64Url,
+    tags: ['Upload'],
   };
 
   saveTemplate(newTemplate);

@@ -12,10 +12,10 @@ import {
   generateMasterAutorizacaoPagamentoPdf,
 } from './pdfGenerator';
 
-const TEMPLATES_STORAGE_KEY = 'preenchendo_ai_templates_v13';
-const HISTORY_STORAGE_KEY = 'preenchendo_ai_history_v13';
+const TEMPLATES_STORAGE_KEY = 'preenchendo_ai_templates_v14';
+const HISTORY_STORAGE_KEY = 'preenchendo_ai_history_v14';
 
-export const CURRENT_TEMPLATE_VERSION = 'v13.0_exact_autorizacao_pagamento_calibrated';
+export const CURRENT_TEMPLATE_VERSION = 'v14.0_master_comodato_veiculo_calibrated';
 
 // 1. TERMO DE RESPONSABILIDADE
 export const FIELDS_TERMO_RESPONSABILIDADE: TemplateField[] = [
@@ -2117,11 +2117,11 @@ export const FIELDS_COMODATO_VEICULO: TemplateField[] = [
     template_id: 'template_comodato_veiculo',
     field_key: 'comodataria_rg',
     label: 'RG da Comodatária',
-    description: 'Número do Registro Geral',
+    description: 'Número da Cédula de Identidade',
     page: 1,
     x: 235,
     y: 212,
-    width: 110,
+    width: 285,
     height: 14,
     font_size: 8.5,
     font_weight: 'normal',
@@ -2136,8 +2136,8 @@ export const FIELDS_COMODATO_VEICULO: TemplateField[] = [
     id: 'f_comodato_cpf',
     template_id: 'template_comodato_veiculo',
     field_key: 'comodataria_cpf',
-    label: 'CPF da Comodatária',
-    description: 'Cadastro de Pessoa Física',
+    label: 'CPF / CNPJ da Comodatária',
+    description: 'Cadastro de Pessoa Física ou Jurídica',
     page: 1,
     x: 185,
     y: 226,
@@ -2157,7 +2157,7 @@ export const FIELDS_COMODATO_VEICULO: TemplateField[] = [
     template_id: 'template_comodato_veiculo',
     field_key: 'comodataria_cidade',
     label: 'Cidade',
-    description: 'Cidade de residência',
+    description: 'Cidade de residência ou sede',
     page: 1,
     x: 125,
     y: 240,
@@ -2177,12 +2177,12 @@ export const FIELDS_COMODATO_VEICULO: TemplateField[] = [
     id: 'f_comodato_endereco',
     template_id: 'template_comodato_veiculo',
     field_key: 'comodataria_endereco',
-    label: 'Endereço (Rua / Av)',
-    description: 'Logradouro completo',
+    label: 'Endereço Completo (Rua / Av e Nº)',
+    description: 'Logradouro completo com número e complemento',
     page: 1,
     x: 320,
     y: 240,
-    width: 175,
+    width: 198,
     height: 14,
     font_size: 8.5,
     font_weight: 'normal',
@@ -2191,27 +2191,7 @@ export const FIELDS_COMODATO_VEICULO: TemplateField[] = [
     required: true,
     sort_order: 5,
     group: 'declarante',
-    test_value: 'AV. PAULISTA',
-  },
-  {
-    id: 'f_comodato_numero',
-    template_id: 'template_comodato_veiculo',
-    field_key: 'comodataria_numero',
-    label: 'Número',
-    description: 'Número do endereço',
-    page: 1,
-    x: 500,
-    y: 240,
-    width: 25,
-    height: 14,
-    font_size: 8.5,
-    font_weight: 'normal',
-    alignment: 'center',
-    field_type: 'text',
-    required: true,
-    sort_order: 6,
-    group: 'declarante',
-    test_value: '1000',
+    test_value: 'AV. PAULISTA, 1000',
   },
   {
     id: 'f_comodato_bairro',
@@ -2695,6 +2675,22 @@ export const FIELDS_AUTORIZACAO_PAGAMENTO: TemplateField[] = [
 // ALL 8 STANDARD BUILT-IN TEMPLATES (Padrão)
 export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
   {
+    id: 'template_comodato_veiculo',
+    name: 'Instrumento Particular de Comodato de Veículo',
+    description: 'Instrumento de 7 páginas de comodato de veículo entre CMD GW Comércio de Veículos Automotores Ltda e Comodatária com cláusulas de compliance, LGPD e responsabilidade.',
+    file_hash: 'hash_comodato_veiculo_v3',
+    version: CURRENT_TEMPLATE_VERSION,
+    page_count: 7,
+    page_width: PAGE_WIDTH,
+    page_height: PAGE_HEIGHT,
+    status: 'active',
+    fields: FIELDS_COMODATO_VEICULO,
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-09-10T00:00:00.000Z',
+    is_built_in: true,
+    tags: ['Legal', 'Sales'],
+  },
+  {
     id: 'template_autorizacao_pagamento',
     name: 'Autorização de Pagamento',
     description: 'Autorização para que o valor acordado com a venda de veículo seja efetuado diretamente na conta corrente de titularidade da empresa.',
@@ -2708,6 +2704,7 @@ export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-08-20T00:00:00.000Z',
     is_built_in: true,
+    tags: ['Finance', 'Legal'],
   },
   {
     id: 'template_termo_responsabilidade',
@@ -2723,21 +2720,7 @@ export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-08-19T00:00:00.000Z',
     is_built_in: true,
-  },
-  {
-    id: 'template_comodato_veiculo',
-    name: 'Instrumento Particular de Comodato de Veículo',
-    description: 'Instrumento de 7 páginas de comodato de veículo entre CMD GW Comércio de Veículos Automotores Ltda e Comodatária com cláusulas de compliance, LGPD e responsabilidade.',
-    file_hash: 'hash_comodato_veiculo_v2',
-    version: CURRENT_TEMPLATE_VERSION,
-    page_count: 7,
-    page_width: PAGE_WIDTH,
-    page_height: PAGE_HEIGHT,
-    status: 'active',
-    fields: FIELDS_COMODATO_VEICULO,
-    created_at: '2026-01-01T00:00:00.000Z',
-    updated_at: '2026-08-20T00:00:00.000Z',
-    is_built_in: true,
+    tags: ['Legal', 'HR'],
   },
   {
     id: 'template_carta_cancelamento',
@@ -2753,6 +2736,7 @@ export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-08-19T00:00:00.000Z',
     is_built_in: true,
+    tags: ['Legal', 'Sales'],
   },
   {
     id: 'template_dacao_pagamento',
@@ -2768,6 +2752,7 @@ export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-08-19T00:00:00.000Z',
     is_built_in: true,
+    tags: ['Sales', 'Finance'],
   },
   {
     id: 'template_isencao_nf_servicos',
@@ -2783,6 +2768,7 @@ export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-08-19T00:00:00.000Z',
     is_built_in: true,
+    tags: ['Finance', 'Legal'],
   },
   {
     id: 'template_termo_compra_usado_gwm',
@@ -2798,6 +2784,7 @@ export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-08-19T00:00:00.000Z',
     is_built_in: true,
+    tags: ['Sales', 'Legal'],
   },
   {
     id: 'template_formulario_devolucao',
@@ -2813,10 +2800,13 @@ export const ALL_BUILT_IN_TEMPLATES: DocumentTemplate[] = [
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-08-19T00:00:00.000Z',
     is_built_in: true,
+    tags: ['Finance', 'HR'],
   },
 ];
 
-export const BUILT_IN_TEMPLATE_RESPONSABILIDADE = ALL_BUILT_IN_TEMPLATES[0];
+export const BUILT_IN_TEMPLATE_COMODATO = ALL_BUILT_IN_TEMPLATES[0];
+export const BUILT_IN_TEMPLATE_RESPONSABILIDADE =
+  ALL_BUILT_IN_TEMPLATES.find((t) => t.id === 'template_termo_responsabilidade') || ALL_BUILT_IN_TEMPLATES[0];
 
 export function createDefaultFieldsForTemplate(templateId: string): TemplateField[] {
   const match = ALL_BUILT_IN_TEMPLATES.find((t) => t.id === templateId);
@@ -2905,8 +2895,14 @@ export function loadAllTemplates(): DocumentTemplate[] {
     for (const builtIn of ALL_BUILT_IN_TEMPLATES) {
       const idx = parsed.findIndex((t) => t.id === builtIn.id);
       if (idx >= 0) {
+        // Ensure tags are present and preserve any custom additions
+        if (!parsed[idx].tags || parsed[idx].tags.length === 0) {
+          parsed[idx].tags = builtIn.tags || [];
+          changed = true;
+        }
         if (parsed[idx].version !== CURRENT_TEMPLATE_VERSION || (parsed[idx].fields || []).length !== builtIn.fields.length) {
-          parsed[idx] = builtIn;
+          const userTags = parsed[idx].tags;
+          parsed[idx] = { ...builtIn, tags: userTags && userTags.length > 0 ? userTags : builtIn.tags || [] };
           changed = true;
         }
       } else {
